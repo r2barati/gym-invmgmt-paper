@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Archival
+archive/
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.synctex.gz
+*.pdf
+!paper/figures/framework_architecture.pdf
+
+# Data / Models (large binary files — hosted on HuggingFace)
+data/external/
+data/models/*.zip
+data/models/*.pkl
+data/models/*.gguf
+data/models/archive/
+training_logs/
+
+# Generated benchmark artifacts
+results/rl_models/
+
+# Benchmarks generated artifacts
+benchmarks/logs/
+benchmarks/checkpoints/
+benchmarks/eval_logs/
+benchmarks/*.log
+
+# Journal submission bundles generated from tracked manuscript assets
+paper/submission_figures/
+paper/COR_figure_upload_package.zip

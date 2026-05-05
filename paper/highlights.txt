@@ -1,0 +1,7 @@
+Highlights
+
+- Open Gymnasium benchmark for multi-echelon inventory policy evaluation
+- Shared scenarios compare OR solvers, heuristics, RL, IL, and LLM baselines
+- Informed stochastic programming reaches about 95% of Oracle profit
+- PPO-Transformer leads learned policies with fast amortized inference
+- Goodwill feedback creates a service-level stress test for inventory control

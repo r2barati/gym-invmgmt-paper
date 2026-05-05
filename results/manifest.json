@@ -1,0 +1,399 @@
+{
+    "generated_at": "2026-05-03T01:54:51.901378Z",
+    "agent_roster_count": 29,
+    "agents": [
+        "Oracle",
+        "MSSP",
+        "MSSP-I",
+        "DLP",
+        "DLP-I",
+        "Newsvendor",
+        "(s,S)",
+        "ExpSmoothing",
+        "Newsvendor-I",
+        "(s,S)-I",
+        "ExpSmoothing-I",
+        "EchelonApprox",
+        "EchelonApprox-I",
+        "PPO-MLP",
+        "PPO-GNN",
+        "PPO-Transformer",
+        "ST-PPO",
+        "Residual",
+        "SAC",
+        "PPO-MLP-B",
+        "GNN-IL",
+        "DAgger-G",
+        "DAgger-B",
+        "PPO-GNN-B",
+        "ST-PPO-B",
+        "Residual-B",
+        "SAC-B",
+        "PPO-MLP-v1",
+        "PPO-MLP-raw"
+    ],
+    "scenarios_count": 26,
+    "canonical_csv_path": "results/benchmark_final_merged.csv",
+    "optional_llm_columns": {
+        "LLM_Policy_C_Profit": {
+            "present": true,
+            "nonnull_scenarios": 26
+        },
+        "LLM_ZS_Direct_Profit": {
+            "present": false,
+            "nonnull_scenarios": 0
+        },
+        "LLM_InvAgent_C_Profit": {
+            "present": false,
+            "nonnull_scenarios": 0
+        }
+    },
+    "diagnostic_artifacts": {
+        "LLM-ZS-Direct": "results/diagnostics/llm_zs_direct_diagnostic.csv"
+    },
+    "model_artifacts": {
+        "ST-PPO-B": {
+            "base": {
+                "model": {
+                    "path": "data/models/st-ppo_base_blind.zip",
+                    "exists": true,
+                    "bytes": 6551455,
+                    "mtime": "2026-04-30T19:53:05.844747",
+                    "sha256": "3a329a546dc3064667a672bab18df11fe6854e713314b0e5d9a968c6fdd19082"
+                },
+                "vecnormalize": {
+                    "path": "data/models/st-ppo_base_blind_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 23226,
+                    "mtime": "2026-04-30T19:53:05.864832",
+                    "sha256": "e86392b7180e5889ebc3aaa01e5d48ea95ae69f9bfed5ebe809f082c34b455e6"
+                }
+            },
+            "serial": {
+                "model": {
+                    "path": "data/models/st-ppo_serial_blind.zip",
+                    "exists": true,
+                    "bytes": 5754896,
+                    "mtime": "2026-04-30T19:32:27.515654",
+                    "sha256": "cb406de3069c32b8af1cde45250e75a871f2d3c61a099f1c1eb650ca6827e296"
+                },
+                "vecnormalize": {
+                    "path": "data/models/st-ppo_serial_blind_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 9628,
+                    "mtime": "2026-04-30T19:32:27.541113",
+                    "sha256": "82e36de306b0c15d4e7412aea7600421b1c549b0de8bc6f2e32745f4a2857214"
+                }
+            }
+        },
+        "GNN-IL": {
+            "base": {
+                "model": {
+                    "path": "data/models/ppo_gnn_il_best.zip",
+                    "exists": true,
+                    "bytes": 3721776,
+                    "mtime": "2026-04-30T20:24:27.191856",
+                    "sha256": "f0fbbd4251a25cdcb1bb554be3ba43fb2b052762d6c7f6c440562d906ea3a4c8"
+                },
+                "vecnormalize": {
+                    "path": "data/models/vec_normalize_gnn_il.pkl",
+                    "exists": true,
+                    "bytes": 6958,
+                    "mtime": "2026-04-30T20:24:48.072232",
+                    "sha256": "70f9f9912fe9836598a4d1808e3153c1e38528fd84d4af31c7c5b4b96b91eeb3"
+                }
+            },
+            "serial": {
+                "model": {
+                    "path": "data/models/ppo_gnn_il_serial_best.zip",
+                    "exists": true,
+                    "bytes": 3027859,
+                    "mtime": "2026-04-30T20:47:56.063267",
+                    "sha256": "dc5f3a9ab4a1a3ad3d584e51249dbf7f3fa328e047499504da6b574f45b0ff6b"
+                },
+                "vecnormalize": {
+                    "path": "data/models/vec_normalize_gnn_il_serial.pkl",
+                    "exists": true,
+                    "bytes": 3454,
+                    "mtime": "2026-04-30T20:51:17.907560",
+                    "sha256": "2edd52f09297f3c19c3db2eec8c2faf4663432de7dc79f0fd8e07025a84d43c0"
+                }
+            }
+        },
+        "PPO-GNN": {
+            "base": {
+                "model": {
+                    "path": "data/models/gnn-v3_base.zip",
+                    "exists": true,
+                    "bytes": 7395416,
+                    "mtime": "2026-04-27T17:26:59.813021",
+                    "sha256": "3eca4fa90236d16d58d68623e4c14d917352c74d65e98a94330a2b9a4983c96a"
+                },
+                "vecnormalize": {
+                    "path": "data/models/gnn-v3_base_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 6958,
+                    "mtime": "2026-04-27T17:26:59.844651",
+                    "sha256": "473240532303414a0de91c26bd3d0869c54ebbf49a30cf5c9e17c5870f20cd9e"
+                }
+            },
+            "serial": {
+                "model": {
+                    "path": "data/models/gnn-v3_serial.zip",
+                    "exists": true,
+                    "bytes": 6025672,
+                    "mtime": "2026-04-27T17:26:59.860506",
+                    "sha256": "f8048d8400b807006ea6f7a8ea8a23a6850b5b13e4d7a0f34ade62519856f784"
+                },
+                "vecnormalize": {
+                    "path": "data/models/gnn-v3_serial_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 3454,
+                    "mtime": "2026-04-27T17:26:59.884049",
+                    "sha256": "0dd1a63da6bd1961cff7a366148b4982703dc8417f31ad3e3a8c1dc1d61f0640"
+                }
+            }
+        },
+        "Residual": {
+            "base": {
+                "model": {
+                    "path": "data/models/residual_base.zip",
+                    "exists": true,
+                    "bytes": 2881820,
+                    "mtime": "2026-04-27T17:27:00.029659",
+                    "sha256": "92ab4389d8e8b12a01fd56d144abed20f2f406d842d3e3706ff846718eb07aba"
+                },
+                "vecnormalize": {
+                    "path": "data/models/residual_base_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 8008,
+                    "mtime": "2026-04-27T17:27:00.057330",
+                    "sha256": "7cbbea3dccd5a7bba4e24f9ad62e3ca33df201080b2da3b6c97eea8edb2da214"
+                }
+            },
+            "serial": {
+                "model": {
+                    "path": "data/models/residual_serial.zip",
+                    "exists": true,
+                    "bytes": 1295556,
+                    "mtime": "2026-04-27T17:27:00.072999",
+                    "sha256": "8ee89d2b8a7c100e9d3f8e9a83da65846b02d9fa92e8884f848594bca00618a5"
+                },
+                "vecnormalize": {
+                    "path": "data/models/residual_serial_vecnorm.pkl",
+                    "exists": true,
+                    "bytes": 3160,
+                    "mtime": "2026-04-27T17:27:00.086579",
+                    "sha256": "7c85c48c19f2d7a19311bca1a38467e6508bae268b223a4f34472efbdc4d3628"
+                }
+            }
+        }
+    },
+    "cache_files": {
+        "Oracle": {
+            "path": "benchmarks/../results/cache_v2/bench_Oracle.csv",
+            "exists": true,
+            "bytes": 78999,
+            "mtime": "2026-05-02T18:45:28.237832",
+            "sha256": "9ed0ac9f1b32e291adc912f997af49ef4c3d02f677788b2ecabccaa65d86381e"
+        },
+        "MSSP": {
+            "path": "benchmarks/../results/cache_v2/bench_MSSP.csv",
+            "exists": true,
+            "bytes": 86642,
+            "mtime": "2026-05-02T19:43:59.483315",
+            "sha256": "a5ba4cb8a4b450b167d4d242e4a078d878d81be4b9efe27a6a354ad2ccca12c5"
+        },
+        "MSSP-I": {
+            "path": "benchmarks/../results/cache_v2/bench_MSSP-I.csv",
+            "exists": true,
+            "bytes": 85591,
+            "mtime": "2026-05-02T20:17:13.046904",
+            "sha256": "f107dbaf6bcac0d27f616b8211eb99973afc73d0ce402914a4d7f73b85e4bc3d"
+        },
+        "DLP": {
+            "path": "benchmarks/../results/cache_v2/bench_DLP.csv",
+            "exists": true,
+            "bytes": 93857,
+            "mtime": "2026-05-02T18:50:12.874194",
+            "sha256": "3cddd426f9d6d0d7ebe6cfcb12dd5b42b2000bf481690e8deb7e411738cb23b2"
+        },
+        "DLP-I": {
+            "path": "benchmarks/../results/cache_v2/bench_DLP-I.csv",
+            "exists": true,
+            "bytes": 94900,
+            "mtime": "2026-05-02T18:49:57.772193",
+            "sha256": "7daec86d1adcca63e5e48e60ad4c28a6d150365b725dd79d3ca74755b121233c"
+        },
+        "Newsvendor": {
+            "path": "benchmarks/../results/cache_v2/bench_Newsvendor.csv",
+            "exists": true,
+            "bytes": 96097,
+            "mtime": "2026-05-02T18:51:39.492720",
+            "sha256": "4aa042a87bc390d6195840609aa8e20620ea9c96096f5ed337de04e35a3b5e01"
+        },
+        "(s,S)": {
+            "path": "benchmarks/../results/cache_v2/bench_s,S.csv",
+            "exists": true,
+            "bytes": 95102,
+            "mtime": "2026-05-02T18:51:35.016848",
+            "sha256": "6320a08b693ccb8666851db7ee99f686edabfce8c91955c14b3066b0c9b1d55c"
+        },
+        "ExpSmoothing": {
+            "path": "benchmarks/../results/cache_v2/bench_ExpSmoothing.csv",
+            "exists": true,
+            "bytes": 95913,
+            "mtime": "2026-05-02T18:51:36.193900",
+            "sha256": "6441fc797820a23a1622bfc824bdab83eda01f4609b2cc340f7db5c62d77214e"
+        },
+        "Newsvendor-I": {
+            "path": "benchmarks/../results/cache_v2/bench_Newsvendor-I.csv",
+            "exists": true,
+            "bytes": 94035,
+            "mtime": "2026-05-02T18:51:36.835776",
+            "sha256": "46158554be6dd01f2f819166fc4bd8c022c41c428502d8a650f5596e9342a5a4"
+        },
+        "(s,S)-I": {
+            "path": "benchmarks/../results/cache_v2/bench_s,S-I.csv",
+            "exists": true,
+            "bytes": 91926,
+            "mtime": "2026-05-02T18:52:50.902718",
+            "sha256": "6c7eb553058e222a241d98d6846c05100d8fda666638296e523942837d80c0e4"
+        },
+        "ExpSmoothing-I": {
+            "path": "benchmarks/../results/cache_v2/bench_ExpSmoothing-I.csv",
+            "exists": true,
+            "bytes": 95963,
+            "mtime": "2026-05-02T18:52:56.564892",
+            "sha256": "3af92a42da48b1a26a34082c11056974db583aa84392f381e2893495e32b27e7"
+        },
+        "EchelonApprox": {
+            "path": "benchmarks/../results/cache_v2/bench_EchelonApprox.csv",
+            "exists": true,
+            "bytes": 96183,
+            "mtime": "2026-05-02T18:52:58.952929",
+            "sha256": "d0dbfaf55911e2c321d22e169f752c1f166161c932217f86a738b0ebc815c3d1"
+        },
+        "EchelonApprox-I": {
+            "path": "benchmarks/../results/cache_v2/bench_EchelonApprox-I.csv",
+            "exists": true,
+            "bytes": 93551,
+            "mtime": "2026-05-02T18:52:56.002464",
+            "sha256": "16cd6aede408aad6efa96a6416f875576f6bd070306afd5220e0bde059aae693"
+        },
+        "PPO-MLP": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-MLP.csv",
+            "exists": true,
+            "bytes": 79878,
+            "mtime": "2026-05-02T18:54:22.977031",
+            "sha256": "de315667faf7123cde28ef25d81fac51a1c9be2092b0c96b18c318894e159d60"
+        },
+        "PPO-GNN": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-GNN.csv",
+            "exists": true,
+            "bytes": 78776,
+            "mtime": "2026-05-02T18:55:11.967341",
+            "sha256": "80a4885f4aeb1e2b7fb80e4f512e7c103ae2a1f7af622d828e53977e95051a42"
+        },
+        "PPO-Transformer": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-Transformer.csv",
+            "exists": true,
+            "bytes": 84855,
+            "mtime": "2026-05-02T18:54:52.831090",
+            "sha256": "a7fa54dfbb79e1ff4b9b7d8e452fa5155f6d6780e4e9bd2dc175ff9a8faabf9a"
+        },
+        "ST-PPO": {
+            "path": "benchmarks/../results/cache_v2/bench_ST-PPO.csv",
+            "exists": true,
+            "bytes": 83046,
+            "mtime": "2026-05-02T18:55:00.474418",
+            "sha256": "ab3032bbd6b2dfc06e506d0fcd9f784120b464da209205ca8064a103a1879f30"
+        },
+        "Residual": {
+            "path": "benchmarks/../results/cache_v2/bench_Residual.csv",
+            "exists": true,
+            "bytes": 93506,
+            "mtime": "2026-05-02T18:55:51.706944",
+            "sha256": "7bc9dc8f6735b6ad9796dd9a90d674d7277ab40f2edd81352488276afd1cdaed"
+        },
+        "SAC": {
+            "path": "benchmarks/../results/cache_v2/bench_SAC.csv",
+            "exists": true,
+            "bytes": 87585,
+            "mtime": "2026-05-02T18:56:10.017526",
+            "sha256": "9ae8c0e48f724f5819f482d35162082815c4e4d6f33db1e97996e4e35fdec7c4"
+        },
+        "PPO-MLP-B": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-MLP-B.csv",
+            "exists": true,
+            "bytes": 81590,
+            "mtime": "2026-05-02T18:56:12.110380",
+            "sha256": "fc70f6e7191f55c03632701bf76f2c3b081c90f59fda3a91448959233479185d"
+        },
+        "GNN-IL": {
+            "path": "benchmarks/../results/cache_v2/bench_GNN-IL.csv",
+            "exists": true,
+            "bytes": 87412,
+            "mtime": "2026-05-02T18:57:03.730155",
+            "sha256": "b689d4a47fd9054c91ac2bea1b9cbb374391073bcc9bb911222ce331ddf70fc8"
+        },
+        "DAgger-G": {
+            "path": "benchmarks/../results/cache_v2/bench_DAgger-G.csv",
+            "exists": true,
+            "bytes": 94039,
+            "mtime": "2026-05-02T18:57:40.572481",
+            "sha256": "b9537220f03d6477e238f379c49b48a9a19e949277a5062bcc8f8203867b53ca"
+        },
+        "DAgger-B": {
+            "path": "benchmarks/../results/cache_v2/bench_DAgger-B.csv",
+            "exists": true,
+            "bytes": 94711,
+            "mtime": "2026-05-02T18:58:01.856989",
+            "sha256": "b8779b4432177681066b6dd3fad344e64858c86045604ba93d0db99e8b3fc312"
+        },
+        "PPO-GNN-B": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-GNN-B.csv",
+            "exists": true,
+            "bytes": 77289,
+            "mtime": "2026-05-02T18:58:09.430220",
+            "sha256": "5e59c4dc591e663e68d988dbcb2f6369984d6a1100ba0d3b093df2e0f137ee87"
+        },
+        "ST-PPO-B": {
+            "path": "benchmarks/../results/cache_v2/bench_ST-PPO-B.csv",
+            "exists": true,
+            "bytes": 83484,
+            "mtime": "2026-05-02T18:58:45.091027",
+            "sha256": "99d7dd6d9c1911b1ebd93a6476bea02ba7f6be77ed59dc7864935a807cbb9238"
+        },
+        "Residual-B": {
+            "path": "benchmarks/../results/cache_v2/bench_Residual-B.csv",
+            "exists": true,
+            "bytes": 95974,
+            "mtime": "2026-05-02T18:59:09.127872",
+            "sha256": "a22bc99f483ae8d0983170e6e278523ee885a597ab3dccd593ceb995ddbbb92c"
+        },
+        "SAC-B": {
+            "path": "benchmarks/../results/cache_v2/bench_SAC-B.csv",
+            "exists": true,
+            "bytes": 91785,
+            "mtime": "2026-05-02T18:59:10.216616",
+            "sha256": "ca7169963151e3e725cd89ff6e9d41323b272627ffdc1e65a3a4d9702a9c1586"
+        },
+        "PPO-MLP-v1": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-MLP-v1.csv",
+            "exists": true,
+            "bytes": 85261,
+            "mtime": "2026-05-02T18:59:07.270135",
+            "sha256": "09169abc53eadc3442545d828277cf8e6100344765d0adb06a52b5ea88f609d4"
+        },
+        "PPO-MLP-raw": {
+            "path": "benchmarks/../results/cache_v2/bench_PPO-MLP-raw.csv",
+            "exists": true,
+            "bytes": 43786,
+            "mtime": "2026-05-02T18:59:30.105067",
+            "sha256": "6c38fdeaaabe5af7872f113355e41a9f46d3ae0d2a8f4e946624731bc9d06a82"
+        }
+    },
+    "notes": "Verified automatically by verify_publication_ready.py",
+    "commit_hash": "6ac5470a61f89e485089a31de385aa5def3ccd66"
+}

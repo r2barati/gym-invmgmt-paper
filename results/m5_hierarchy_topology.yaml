@@ -1,0 +1,73 @@
+name: m5_selected_series_hierarchy
+metadata:
+  adapter: hierarchy_csv_tree_topology
+  source: data/external/m5/sales_train_evaluation.csv
+  hierarchy_cols:
+  - state_id
+  - store_id
+  - cat_id
+  - dept_id
+  - item_id
+  - id
+  group_filter:
+    id: FOODS_3_382_CA_3_evaluation
+  path_count: 1
+  leaf_count: 1
+  topology_assumption: tree-shaped replenishment DAG inferred from dataset forecasting
+    hierarchy; not a physically observed supply-chain network
+  leaf_edges:
+  - leaf: id=FOODS_3_382_CA_3_evaluation
+    market: MARKET
+nodes:
+- id: MARKET
+- id: cat_id=FOODS
+  I0: 80.0
+  h: 0.02
+- id: dept_id=FOODS_3
+  I0: 80.0
+  h: 0.02
+- id: id=FOODS_3_382_CA_3_evaluation
+  I0: 80.0
+  h: 0.02
+- id: item_id=FOODS_3_382
+  I0: 80.0
+  h: 0.02
+- id: state_id=CA
+  I0: 80.0
+  h: 0.02
+- id: store_id=CA_3
+  I0: 80.0
+  h: 0.02
+edges:
+- from: cat_id=FOODS
+  to: dept_id=FOODS_3
+  L: 1
+  p: 1.0
+  g: 0.0
+- from: dept_id=FOODS_3
+  to: item_id=FOODS_3_382
+  L: 1
+  p: 1.0
+  g: 0.0
+- from: id=FOODS_3_382_CA_3_evaluation
+  to: MARKET
+  p: 3.0
+  b: 0.2
+  demand_dist: poisson
+  dist_param:
+    mu: 20.0
+- from: item_id=FOODS_3_382
+  to: id=FOODS_3_382_CA_3_evaluation
+  L: 1
+  p: 1.0
+  g: 0.0
+- from: state_id=CA
+  to: store_id=CA_3
+  L: 1
+  p: 1.0
+  g: 0.0
+- from: store_id=CA_3
+  to: cat_id=FOODS
+  L: 1
+  p: 1.0
+  g: 0.0

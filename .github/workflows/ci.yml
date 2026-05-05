@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  artifact-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Check Python syntax
+      run: python -m compileall agents benchmarks gym_invmgmt scripts tests
+
+    - name: Check released artifacts
+      run: |
+        pytest \
+          tests/test_publication_artifacts.py \
+          tests/test_roster_consistency.py \
+          tests/test_wrappers.py \
+          -q
