@@ -5,6 +5,8 @@ An open-source simulation framework bridging Operations Research (OR) and Machin
 ## Project Links
 
 - Paper/code repository: [r2barati/gym-invmgmt-paper](https://github.com/r2barati/gym-invmgmt-paper)
+- Paper project page: [r2barati.github.io/gym-invmgmt-paper](https://r2barati.github.io/gym-invmgmt-paper/)
+- arXiv paper: [arXiv:2605.11355](https://arxiv.org/abs/2605.11355)
 - Standalone environment package: [r2barati/gym-invmgmt](https://github.com/r2barati/gym-invmgmt)
 - Trained checkpoint archive: [rezabarati/gym-invmgmt-weights](https://huggingface.co/datasets/rezabarati/gym-invmgmt-weights)
 
