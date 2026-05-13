@@ -164,3 +164,24 @@ The shipped `results/benchmark_final_merged.csv` was generated with:
   require explicit LLM evaluation and are not part of the registered non-LLM
   roster. Stopped direct-prompting diagnostics are stored under
   `results/diagnostics/`.
+
+## Citing
+
+If you use this benchmark, result artifact, or environment code in your
+research, please cite the accompanying paper:
+
+```bibtex
+@misc{barati2026gyminvmgmt,
+  title = {gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods},
+  author = {Barati, Reza and Hu, Qinmin Vivian},
+  year = {2026},
+  eprint = {2605.11355},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.LG},
+  url = {https://arxiv.org/abs/2605.11355}
+}
+```
+
+You can also cite the benchmark software release through
+[`CITATION.cff`](CITATION.cff), which points GitHub's citation widget to the
+paper as the preferred citation.

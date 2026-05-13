@@ -1,15 +1,21 @@
 cff-version: 1.2.0
-message: "If you use this repository, please cite this software release."
+message: "If you use this benchmark repository, please cite the accompanying paper and software release."
 title: "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods"
 type: software
 authors:
   - family-names: "Barati"
     given-names: "Reza"
     email: "r2barati@torontomu.ca"
+  - family-names: "Hu"
+    given-names: "Qinmin Vivian"
 repository-code: "https://github.com/r2barati/gym-invmgmt-paper"
 license: MIT
 version: "0.1.0"
 date-released: "2026-05-05"
+identifiers:
+  - type: url
+    value: "https://arxiv.org/abs/2605.11355"
+    description: "arXiv preprint"
 keywords:
   - inventory management
   - supply chain
@@ -18,3 +24,21 @@ keywords:
   - benchmarking
   - gymnasium
   - stochastic programming
+preferred-citation:
+  type: article
+  title: "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods"
+  authors:
+    - family-names: "Barati"
+      given-names: "Reza"
+      email: "r2barati@torontomu.ca"
+    - family-names: "Hu"
+      given-names: "Qinmin Vivian"
+  year: 2026
+  journal: "arXiv preprint arXiv:2605.11355"
+  identifiers:
+    - type: other
+      value: "arXiv:2605.11355"
+      description: "arXiv identifier"
+    - type: url
+      value: "https://arxiv.org/abs/2605.11355"
+      description: "arXiv abstract page"
