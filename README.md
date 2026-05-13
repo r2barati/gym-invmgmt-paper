@@ -91,7 +91,8 @@ hierarchy-inferred rather than a physically observed replenishment network.
 
 ## Reproducibility Quick-Start
 
-To reproduce all main tables and figures from the paper in under 10 minutes:
+To download the released checkpoints, rerun the canonical benchmark artifact,
+and validate the publication files:
 
 ```bash
 # 1. Download pre-trained weights
@@ -101,10 +102,13 @@ bash download_weights.sh
 cd benchmarks
 python3 run_benchmarks.py --agent ALL --seeds 10
 
-# 3. Generate tables and charts
-python3 ../paper/figures/extract_appendix_tables.py
-python3 ../paper/figures/regenerate_appendix_figures.py
+# 3. Verify tests, cached results, manifest, and citation metadata
+python3 verify_publication_ready.py --quick
 ```
+
+The manuscript figure-generation scripts are not shipped in this repository
+snapshot; the canonical merged benchmark artifact is
+`results/benchmark_final_merged.csv`.
 
 ## Reproducing Benchmarks
 
