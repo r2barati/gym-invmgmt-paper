@@ -3,28 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>gym-invmgmt Benchmark</title>
-<meta name="description" content="gym-invmgmt: an open benchmarking framework for inventory management methods. Watch policies run a multi-echelon supply chain, compare 30 agent configurations across 26 scenarios with confidence intervals, and see how rankings shift with the test conditions.">
+<title>gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods</title>
+<meta name="description" content="Project page for the paper gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods (Barati and Hu, arXiv:2605.11355). Watch policies run a multi-echelon supply chain, compare 30 agent configurations across 26 scenarios with confidence intervals, and see how rankings shift with the test conditions.">
+<meta name="author" content="Reza Barati, Qinmin Vivian Hu">
+<link rel="canonical" href="https://r2barati.github.io/gym-invmgmt-paper/">
+<!-- Bibliographic metadata for scholarly indexing; the paper itself is the arXiv record. -->
+<meta name="citation_title" content="gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods">
+<meta name="citation_author" content="Barati, Reza">
+<meta name="citation_author_institution" content="Toronto Metropolitan University">
+<meta name="citation_author" content="Hu, Qinmin Vivian">
+<meta name="citation_author_institution" content="Toronto Metropolitan University">
+<meta name="citation_publication_date" content="2026">
+<meta name="citation_arxiv_id" content="2605.11355">
+<meta name="citation_abstract_html_url" content="https://arxiv.org/abs/2605.11355">
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/2605.11355">
+<meta name="citation_keywords" content="inventory management; supply chain; operations research; reinforcement learning; benchmarking; stochastic programming">
+<meta property="og:site_name" content="gym-invmgmt">
 <meta property="og:title" content="gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods">
 <meta property="og:description" content="Optimization, heuristic, RL, imitation and LLM inventory policies under one shared simulation contract. 26 scenarios, 10 seeds, open results.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r2barati.github.io/gym-invmgmt-paper/">
 <meta property="og:image" content="https://r2barati.github.io/gym-invmgmt-paper/media/teaser-poster.png">
+<meta property="og:image:alt" content="Simulation player showing a multi-echelon supply network with inventory levels and cumulative profit">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods">
+<meta name="twitter:description" content="Optimization, heuristic, RL, imitation and LLM inventory policies under one shared simulation contract. 26 scenarios, 10 seeds, open results.">
+<meta name="twitter:image" content="https://r2barati.github.io/gym-invmgmt-paper/media/teaser-poster.png">
 <link rel="preload" href="fonts/cmu-serif-500-roman.woff2" as="font" type="font/woff2" crossorigin>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "ScholarlyArticle",
-  "headline": "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods",
-  "author": [
-    {"@type": "Person", "name": "Reza Barati", "affiliation": "Toronto Metropolitan University"},
-    {"@type": "Person", "name": "Qinmin Vivian Hu", "affiliation": "Toronto Metropolitan University"}
-  ],
-  "datePublished": "2026-05",
-  "url": "https://arxiv.org/abs/2605.11355",
-  "codeRepository": "https://github.com/r2barati/gym-invmgmt-paper",
-  "license": "https://opensource.org/licenses/MIT"
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://r2barati.github.io/gym-invmgmt-paper/",
+      "url": "https://r2barati.github.io/gym-invmgmt-paper/",
+      "name": "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods",
+      "about": {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#paper"},
+      "mainEntity": {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#code"}
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://r2barati.github.io/gym-invmgmt-paper/#paper",
+      "headline": "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods",
+      "name": "gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods",
+      "author": [{"@id": "https://r2barati.github.io/gym-invmgmt-paper/#barati"}, {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#hu"}],
+      "datePublished": "2026-05",
+      "url": "https://arxiv.org/abs/2605.11355",
+      "identifier": {"@type": "PropertyValue", "propertyID": "arXiv", "value": "2605.11355"},
+      "encoding": {"@type": "MediaObject", "encodingFormat": "application/pdf", "contentUrl": "https://arxiv.org/pdf/2605.11355"},
+      "keywords": ["inventory management", "supply chain", "operations research", "reinforcement learning", "benchmarking", "stochastic programming"]
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://r2barati.github.io/gym-invmgmt-paper/#code",
+      "name": "gym-invmgmt",
+      "description": "Gymnasium environment and benchmark suite for multi-echelon inventory management, with the paper's agents, results and checkpoints.",
+      "codeRepository": "https://github.com/r2barati/gym-invmgmt-paper",
+      "sameAs": ["https://github.com/r2barati/gym-invmgmt", "https://pypi.org/project/gym-invmgmt/"],
+      "programmingLanguage": "Python",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": [{"@id": "https://r2barati.github.io/gym-invmgmt-paper/#barati"}, {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#hu"}],
+      "citation": {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#paper"}
+    },
+    {"@type": "Person", "@id": "https://r2barati.github.io/gym-invmgmt-paper/#barati", "name": "Reza Barati", "affiliation": {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#tmu"}},
+    {"@type": "Person", "@id": "https://r2barati.github.io/gym-invmgmt-paper/#hu", "name": "Qinmin Vivian Hu", "affiliation": {"@id": "https://r2barati.github.io/gym-invmgmt-paper/#tmu"}},
+    {"@type": "CollegeOrUniversity", "@id": "https://r2barati.github.io/gym-invmgmt-paper/#tmu", "name": "Toronto Metropolitan University"}
+  ]
 }
 </script>
 <style>
@@ -397,7 +442,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <span class="tag venue">IEEE WI-IAT 2026</span>
         <span class="tag">arXiv:2605.11355</span>
         <span class="tag">cs.LG · cs.CE</span>
-        <span class="tag">MIT license</span>
+        <span class="tag">Code: MIT license</span>
       </div>
       <h1>gym-invmgmt</h1>
       <p class="subtitle">An Open Benchmarking Framework for Inventory Management Methods</p>
@@ -514,7 +559,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
             <option value="pct">Profit, % of Oracle (mean)</option>
             <option value="iqm">Profit, % of Oracle (IQM)</option>
             <option value="profit">Mean profit</option>
-            <option value="cvar5">CVaR 5% profit (worst-case tail)</option>
+            <option value="worst_seed">Worst of 10 seeds (lowest episode profit)</option>
             <option value="fill_rate">Fill rate</option>
             <option value="avg_inv">Average inventory (lower is leaner)</option>
             <option value="time_sec">Seconds per episode (lower is faster)</option>
@@ -538,7 +583,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <span id="board-n"></span>
         <span><a href="https://github.com/r2barati/gym-invmgmt-paper/blob/main/results/benchmark_final_merged.csv">Download the full CSV</a> · <a href="#start">Compare your own agent</a></span>
       </div>
-      <p class="method-note">% of Oracle is computed per episode against the Oracle on the same demand seed. Whiskers are 95% intervals from a stratified bootstrap that resamples seeds within each scenario (1,000 resamples), so they measure seed noise for a fixed set of scenarios. IQM is the mean of the middle 50% of episodes, which is less sensitive to rare collapses (Agarwal et al., 2021). Informed agents read the true mean of the demand process; blind agents estimate it from realized demand.</p>
+      <p class="method-note">% of Oracle is computed per episode against the Oracle on the same demand seed. Whiskers are 95% intervals from a stratified bootstrap that resamples seeds within each scenario (1,000 resamples), so they measure seed noise for a fixed set of scenarios. IQM is the mean of the middle 50% of episodes, which is less sensitive to rare collapses (Agarwal et al., 2021). Informed agents read the true mean of the demand process; blind agents estimate it from realized demand. Worst of 10 seeds is the lowest episode profit per scenario, averaged over the selected scenarios. The merged CSV reports it as CVaR5, but with 10 seeds the worst 5% of outcomes is a single episode, so it is a worst-case observation rather than an estimate of tail risk.</p>
     </section>
 
     <!-- ── Robustness ── -->
@@ -704,7 +749,7 @@ python3 verify_publication_ready.py --quick</code></pre>
 
 <footer>
   <div class="wrap">
-    <span>gym-invmgmt · MIT license · Reza Barati and Qinmin Vivian Hu</span>
+    <span>gym-invmgmt · Reza Barati and Qinmin Vivian Hu · Code under the MIT license; the paper's license is given on <a href="https://arxiv.org/abs/2605.11355">arXiv</a></span>
     <span>Every number on this page is computed from the repository's result artifacts.</span>
   </div>
 </footer>
@@ -1113,7 +1158,7 @@ python3 verify_publication_ready.py --quick</code></pre>
       pct: { label: "% of Oracle", dir: -1, fmt: pctf, ci: true },
       iqm: { label: "% of Oracle, IQM", dir: -1, fmt: pctf, ci: true },
       profit: { label: "Mean profit", dir: -1, fmt: (v) => fmt0.format(v), ci: true },
-      cvar5: { label: "CVaR 5%", dir: -1, fmt: (v) => fmt0.format(v) },
+      worst_seed: { label: "Worst of 10 seeds", dir: -1, fmt: (v) => fmt0.format(v) },
       fill_rate: { label: "Fill rate", dir: -1, fmt: pctf },
       avg_inv: { label: "Avg inventory", dir: 1, fmt: (v) => fmt1.format(v) },
       time_sec: { label: "Sec / episode", dir: 1, fmt: (v) => (v < 1 ? v.toFixed(3) : fmt1.format(v)) },

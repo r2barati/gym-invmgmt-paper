@@ -6,6 +6,9 @@ Reads the canonical merged CSV (per-scenario means) and the per-agent caches
 - scenario metadata and per-scenario means for every metric the page shows,
 - per-seed profits, paired with the Oracle's on the same demand seeds, so the
   page can compute bootstrap confidence intervals and performance profiles,
+- the worst of the 10 seed profits per scenario. The merged CSV calls this
+  column CVaR5, but with 10 seeds the 5% tail is a single episode, so the page
+  labels it as what it is,
 - mean cost decomposition (profit = revenue - procurement - holding - backlog
   penalty - operating - fixed ordering),
 - a one-line description of every agent configuration.
@@ -73,7 +76,7 @@ INFORMED_NOTE = "Informed: reads the true mean of the demand process."
 BLIND_NOTE = "Blind: estimates demand from realized history only."
 
 METRICS = {"Profit": "profit", "Profit_Std": "profit_std", "FillRate": "fill_rate", "AvgInv": "avg_inv",
-           "CVaR5": "cvar5", "Time_Sec": "time_sec"}
+           "Time_Sec": "time_sec"}
 COSTS = {"Revenue": "revenue", "ProcurementCost": "procurement", "HoldingCost": "holding",
          "BacklogPenalty": "backlog", "OperatingCost": "operating", "FixedOrderingCost": "fixed"}
 
@@ -98,13 +101,13 @@ def describe(aid):
     return text + " " + (BLIND_NOTE if aid in BLIND else INFORMED_NOTE)
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", default=os.path.join(ROOT, "results", "benchmark_final_merged.csv"))
-    ap.add_argument("--out", default=os.path.join(ROOT, "docs", "data", "leaderboard.json"))
-    args = ap.parse_args()
+CSV = os.path.join(ROOT, "results", "benchmark_final_merged.csv")
+OUT = os.path.join(ROOT, "docs", "data", "leaderboard.json")
 
-    df = pd.read_csv(args.csv)
+
+def build(csv_path=CSV):
+    """Return the leaderboard data exactly as written to leaderboard.json."""
+    df = pd.read_csv(csv_path)
     keys = df["ScenarioKey"].tolist()
     scenarios = [
         {"key": r.ScenarioKey, "block": r.Block, "network": r.Network, "demand": r.Demand,
@@ -142,6 +145,7 @@ def main():
                 costs.append(None)
         # The per-seed cache must reproduce the merged means it was merged into.
         for i, (r, ps) in enumerate(zip(rows, per_seed)):
+            r["worst_seed"] = min(ps) if ps else None
             if ps is not None and r["profit"] is not None:
                 mean = sum(ps) / len(ps)
                 assert abs(mean - r["profit"]) < 0.05 + 1e-6 * abs(mean), (aid, keys[i], mean, r["profit"])
@@ -157,11 +161,20 @@ def main():
             "seeds": per_seed,
             "costs": costs,
         })
+    return {"source": os.path.relpath(csv_path, ROOT), "seeds": seeds, "scenarios": scenarios, "agents": agents}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--csv", default=CSV)
+    ap.add_argument("--out", default=OUT)
+    args = ap.parse_args()
+
+    data = build(args.csv)
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w") as f:
-        json.dump({"source": os.path.relpath(args.csv, ROOT), "seeds": seeds, "scenarios": scenarios,
-                   "agents": agents}, f, separators=(",", ":"))
-    print(f"{len(agents)} agents x {len(scenarios)} scenarios x {len(seeds)} seeds -> {args.out}")
+        json.dump(data, f, separators=(",", ":"))
+    print(f"{len(data['agents'])} agents x {len(data['scenarios'])} scenarios x {len(data['seeds'])} seeds -> {args.out}")
 
 
 if __name__ == "__main__":

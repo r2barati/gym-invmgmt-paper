@@ -31,7 +31,6 @@ for p in (ROOT, os.path.join(ROOT, "agents"), os.path.join(ROOT, "benchmarks")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from mssp_agent import RollingHorizonMSSPAgent  # noqa: E402
 from run_benchmarks import (  # noqa: E402
     _cache_path,
     _env_kwargs,
@@ -67,6 +66,8 @@ def slug(key):
 
 
 def rollout(agent_id, family, scfg, seed):
+    from mssp_agent import RollingHorizonMSSPAgent  # needs PuLP, so imported only when replaying
+
     env = CoreEnv(**_env_kwargs(scfg))
     try:
         agent = _make_agent(agent_id, env, scfg, seed)
@@ -98,10 +99,11 @@ def rollout(agent_id, family, scfg, seed):
     }
 
 
-def export(scfg, seed):
+def scenario_meta(scfg, seed):
+    """Network layout and settings the page needs to draw a scenario."""
     env = CoreEnv(**_env_kwargs(scfg))
     net = env.network
-    meta = {
+    return {
         "scenario": scenario_id(scfg),
         "seed": seed,
         "periods": env.num_periods,
@@ -114,17 +116,27 @@ def export(scfg, seed):
         "network_links": [[int(a), int(b)] for a, b in net.network_links],
         "lead_times": {f"{a}-{b}": int(env.graph.edges[a, b].get("L", 0)) for a, b in net.reorder_links},
     }
+
+
+def export(scfg, seed):
+    meta = scenario_meta(scfg, seed)
     runs = [r for r in (rollout(a, fam, scfg, seed) for a, fam in AGENTS) if r is not None]
     return {"meta": meta, "runs": runs}
 
 
-def verify(key, seed, runs, caches, worst):
-    """Each replay must reproduce the benchmark's cached profit for this scenario and seed.
+def matches_cache(agent_id, cached, replay):
+    """Whether a replayed profit reproduces the benchmark's cached profit.
 
     Optimization and heuristic policies must match to rounding. Learned policies may
     drift slightly with the torch / stable-baselines3 version, so they get a 1%
-    relative tolerance; the largest deviation per policy is recorded in the index.
+    relative tolerance.
     """
+    diff = abs(cached - replay)
+    return diff / max(abs(cached), 1.0) <= 0.01 if agent_id in LEARNED else diff <= 0.5
+
+
+def verify(key, seed, runs, caches, worst):
+    """Check each replay against the cache; record the largest deviation per policy in `worst`."""
     for r in runs:
         c = caches[r["agent"]]
         row = c[(c["ScenarioKey"] == key) & (c["Seed"] == seed)]
@@ -132,11 +144,10 @@ def verify(key, seed, runs, caches, worst):
             raise SystemExit(f"No cached result for {r['agent']} on {key}, seed {seed}")
         cached, replay = float(row["Profit"].iloc[0]), r["kpis"]["profit"]
         diff = abs(cached - replay)
-        rel = diff / max(abs(cached), 1.0)
         w = worst.setdefault(r["agent"], {"max_abs": 0.0, "max_rel": 0.0})
-        w["max_abs"], w["max_rel"] = max(w["max_abs"], round(diff, 2)), max(w["max_rel"], round(rel, 5))
-        too_far = rel > 0.01 if r["agent"] in LEARNED else diff > 0.5
-        if too_far:
+        w["max_abs"] = max(w["max_abs"], round(diff, 2))
+        w["max_rel"] = max(w["max_rel"], round(diff / max(abs(cached), 1.0), 5))
+        if not matches_cache(r["agent"], cached, replay):
             raise SystemExit(f"{r['agent']} on {key}: replay profit {replay} != cached {cached:.1f}")
 
 

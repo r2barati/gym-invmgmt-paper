@@ -235,6 +235,9 @@ The shipped `results/benchmark_final_merged.csv` was generated with:
   (no goodwill, backlog). Per-seed results are identical for every non-LLM
   agent; `LLM-Policy-C` differs only through LLM sampling. The rows are kept so
   the artifact matches the paper; decentralized evaluation is future work.
+- **`*_CVaR5` columns**: Computed as the mean of the worst 5% of episodes, which
+  with 10 seeds is a single episode. Read them as the worst of 10 seeds, not as
+  a tail-risk estimate; the project website labels them that way.
 - **Supplementary LLM diagnostics**: `LLM-ZS-Direct` and `LLM-InvAgent-C`
   require explicit LLM evaluation and are not part of the registered non-LLM
   roster. Stopped direct-prompting diagnostics are stored under

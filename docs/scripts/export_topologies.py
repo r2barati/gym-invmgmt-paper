@@ -41,11 +41,11 @@ def describe(env, name, source, blurb):
     }
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=os.path.join(ROOT, "docs", "data", "topologies.json"))
-    args = ap.parse_args()
+OUT = os.path.join(ROOT, "docs", "data", "topologies.json")
 
+
+def build():
+    """Return the topology list exactly as written to topologies.json."""
     out = [
         describe(CoreEnv(scenario="network"), "Base network", 'CoreEnv(scenario="network")',
                  "The benchmark's divergent multi-echelon network."),
@@ -62,6 +62,15 @@ def main():
         blurb = " ".join(str(cfg.get("description", "")).split())
         out.append(describe(env, cfg.get("name", os.path.basename(path)),
                             os.path.relpath(path, ROOT), blurb))
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=OUT)
+    args = ap.parse_args()
+
+    out = build()
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w") as f:
         json.dump(out, f, separators=(",", ":"))

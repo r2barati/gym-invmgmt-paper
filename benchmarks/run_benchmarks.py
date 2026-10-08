@@ -957,7 +957,9 @@ def merge_all(include_llm=False):
                 row[f'{prefix}_AvgInv'] = agent_df['AvgInv'].mean()
                 row[f'{prefix}_Unfulfilled'] = agent_df['Unfulfilled'].mean()
 
-                # CVaR (5%): mean profit of the worst 5% of outcomes
+                # CVaR (5%): mean profit of the worst 5% of outcomes. With fewer than
+                # 40 seeds the tail holds one episode, so with the canonical 10 seeds
+                # this column is the worst observed seed, not a tail-risk estimate.
                 n_tail = max(1, int(0.05 * len(profits)))
                 part_idx = min(n_tail, len(profits) - 1)
                 row[f'{prefix}_CVaR5'] = float(np.mean(np.partition(profits, part_idx)[:n_tail]))

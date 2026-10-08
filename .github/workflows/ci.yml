@@ -34,3 +34,6 @@ jobs:
           tests/test_wrappers.py \
           tests/test_evaluate_custom.py \
           -q
+
+    - name: Check project page data against the results
+      run: python docs/scripts/check_site_data.py

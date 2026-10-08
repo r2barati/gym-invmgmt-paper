@@ -54,9 +54,9 @@ dev = [
     "pre-commit>=3.0",
 ]
 rl = ["torch", "stable-baselines3", "torch_geometric"]
-or = ["pulp"]
+or = ["pulp<4"]  # PuLP 4 removed LpVariable.dicts, used by the Oracle, DLP and MSSP
 llm = ["llama-cpp-python", "openai", "huggingface_hub"]
-all = ["torch", "stable-baselines3", "torch_geometric", "pulp", "llama-cpp-python", "openai"]
+all = ["torch", "stable-baselines3", "torch_geometric", "pulp<4", "llama-cpp-python", "openai"]
 
 [project.urls]
 "Homepage" = "https://github.com/r2barati/gym-invmgmt-paper"

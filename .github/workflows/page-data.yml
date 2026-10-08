@@ -1,15 +1,22 @@
-name: Generate page rollouts
+name: Generate page data
 
-# Replays benchmark episodes for the project page, including the trained
-# policies, whose checkpoints are downloaded from Hugging Face. Each replay is
-# checked against results/cache_v2 before the data is committed.
+# Regenerates everything in docs/data/ from the canonical results: the
+# leaderboard, the topologies and the rollouts, which replay benchmark episodes
+# including the trained policies (checkpoints are downloaded from Hugging Face).
+# Each replay is checked against results/cache_v2 and the whole data set is
+# validated before it is committed back to the branch. On main, which this
+# workflow does not push to, run it manually and the data is uploaded as an
+# artifact instead.
 
 on:
   workflow_dispatch:
   push:
     branches-ignore: [main, gh-pages]
     paths:
-      - "docs/scripts/export_rollouts.py"
+      - "results/**"
+      - "benchmarks/run_benchmarks.py"
+      - "gym_invmgmt/topologies/**"
+      - "docs/scripts/**"
       - ".github/workflows/page-data.yml"
 
 permissions:
@@ -20,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  rollouts:
+  page-data:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -34,31 +41,36 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          # PuLP 3 removed LpVariable.dicts, which the Oracle and MSSP use.
-          pip install -e . stable-baselines3 "pulp<3"
+          pip install -e ".[or]" stable-baselines3
 
       - name: Download checkpoints
         run: bash download_weights.sh
 
-      - name: Export and verify rollouts
-        run: python docs/scripts/export_rollouts.py --require-ml --verify
+      - name: Export page data
+        run: |
+          python docs/scripts/export_leaderboard.py
+          python docs/scripts/export_topologies.py
+          python docs/scripts/export_rollouts.py --require-ml --verify
 
-      - name: Commit updated rollouts
+      - name: Check page data against the results
+        run: python docs/scripts/check_site_data.py
+
+      - name: Commit updated page data
         if: github.ref != 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/data/rollouts
+          git add docs/data
           if git diff --cached --quiet; then
-            echo "Rollout data unchanged."
+            echo "Page data unchanged."
             exit 0
           fi
-          git commit -m "Regenerate page rollouts with trained policies"
+          git commit -m "Regenerate project page data"
           git push
 
-      - name: Upload rollouts
+      - name: Upload page data
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: page-rollouts
-          path: docs/data/rollouts
+          name: page-data
+          path: docs/data
