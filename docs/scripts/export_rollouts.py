@@ -1,12 +1,17 @@
 """Export per-period rollouts for the project-page simulation player.
 
-Runs five policies that need no RL checkpoints on every main benchmark scenario
-(the 22 non-MARL rows) and writes the state matrices the page animates
-(inventory, pipeline, shipments, demand, backlog, profit), one JSON file per
+Replays the benchmark's own episodes (one canonical seed) on every main
+scenario (the 22 non-MARL rows) and writes the state matrices the page
+animates (inventory, shipments, demand, backlog, profit), one JSON file per
 scenario plus an index.
+
+Optimization and heuristic policies always run. Trained policies run when their
+checkpoints are in data/models/ (see download_weights.sh); otherwise they are
+skipped, or the script fails with --require-ml.
 
 Usage (from the repository root):
     python docs/scripts/export_rollouts.py --out docs/data/rollouts
+    python docs/scripts/export_rollouts.py --require-ml --verify   # as run in CI
 """
 
 import argparse
@@ -16,6 +21,7 @@ import re
 import sys
 
 import numpy as np
+import pandas as pd
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 for p in (ROOT, os.path.join(ROOT, "agents"), os.path.join(ROOT, "benchmarks")):
@@ -23,11 +29,29 @@ for p in (ROOT, os.path.join(ROOT, "agents"), os.path.join(ROOT, "benchmarks")):
         sys.path.insert(0, p)
 
 from mssp_agent import RollingHorizonMSSPAgent  # noqa: E402
-from run_benchmarks import _env_kwargs, _extract_kpis, _make_agent, build_all_scenarios, scenario_id  # noqa: E402
+from run_benchmarks import (  # noqa: E402
+    _cache_path,
+    _env_kwargs,
+    _extract_kpis,
+    _make_agent,
+    build_all_scenarios,
+    scenario_id,
+)
 
 from gym_invmgmt import CoreEnv  # noqa: E402
 
-AGENTS = ["Oracle", "MSSP-I", "Newsvendor-I", "(s,S)", "DLP"]
+# (agent id, family shown on the page). Learned policies need released checkpoints.
+AGENTS = [
+    ("Oracle", "Upper bound"),
+    ("MSSP-I", "Optimization"),
+    ("DLP", "Optimization"),
+    ("Newsvendor-I", "Heuristic"),
+    ("(s,S)", "Heuristic"),
+    ("PPO-Transformer", "Learned"),
+    ("PPO-MLP", "Learned"),
+    ("DAgger-G", "Learned"),
+]
+LEARNED = {a for a, fam in AGENTS if fam == "Learned"}
 DEFAULT = "A_Core|base|trend+seasonal+shock|GW:False|BL:True|MARL:False"
 
 
@@ -39,9 +63,16 @@ def slug(key):
     return re.sub(r"[^a-z0-9]+", "-", key.lower().replace("+", "-")).strip("-")
 
 
-def rollout(agent_id, scfg, seed):
+def rollout(agent_id, family, scfg, seed):
     env = CoreEnv(**_env_kwargs(scfg))
-    agent = _make_agent(agent_id, env, scfg, seed)
+    try:
+        agent = _make_agent(agent_id, env, scfg, seed)
+    except ImportError:  # learned policies need torch and stable-baselines3
+        if agent_id not in LEARNED:
+            raise
+        agent = None
+    if agent is None:
+        return None
     obs, _ = env.reset(seed=seed)
     done, t = False, 0
     while not done:
@@ -52,6 +83,7 @@ def rollout(agent_id, scfg, seed):
     k = _extract_kpis(env)
     return {
         "agent": agent_id,
+        "family": family,
         "kpis": {"profit": round(k["Profit"], 1), "fill_rate": round(k["FillRate"], 4),
                  "avg_inv": round(k["AvgInv"], 1)},
         "X": _r(env.X[: T + 1]),          # on-hand inventory per node index
@@ -79,15 +111,31 @@ def export(scfg, seed):
         "network_links": [[int(a), int(b)] for a, b in net.network_links],
         "lead_times": {f"{a}-{b}": int(env.graph.edges[a, b].get("L", 0)) for a, b in net.reorder_links},
     }
-    return {"meta": meta, "runs": [rollout(a, scfg, seed) for a in AGENTS]}
+    runs = [r for r in (rollout(a, fam, scfg, seed) for a, fam in AGENTS) if r is not None]
+    return {"meta": meta, "runs": runs}
+
+
+def verify(key, seed, runs, caches):
+    """Each replay must reproduce the benchmark's cached profit for this scenario and seed."""
+    for r in runs:
+        c = caches[r["agent"]]
+        row = c[(c["ScenarioKey"] == key) & (c["Seed"] == seed)]
+        if row.empty:
+            raise SystemExit(f"No cached result for {r['agent']} on {key}, seed {seed}")
+        cached = float(row["Profit"].iloc[0])
+        if abs(cached - r["kpis"]["profit"]) > 0.5:
+            raise SystemExit(f"{r['agent']} on {key}: replay profit {r['kpis']['profit']} != cached {cached:.1f}")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(ROOT, "docs", "data", "rollouts"))
     ap.add_argument("--seed", type=int, default=42)  # first canonical benchmark seed
+    ap.add_argument("--require-ml", action="store_true", help="fail if a learned policy's checkpoint is missing")
+    ap.add_argument("--verify", action="store_true", help="check every replay against results/cache_v2")
     args = ap.parse_args()
 
+    caches = {a: pd.read_csv(_cache_path(a)) for a, _ in AGENTS} if args.verify else None
     os.makedirs(args.out, exist_ok=True)
     index = []
     for scfg in build_all_scenarios():
@@ -95,12 +143,17 @@ def main():
             continue
         key = scenario_id(scfg)
         data = export(scfg, args.seed)
+        missing = LEARNED - {r["agent"] for r in data["runs"]}
+        if missing and args.require_ml:
+            raise SystemExit(f"Missing checkpoints for {sorted(missing)}; run download_weights.sh first")
+        if args.verify:
+            verify(key, args.seed, data["runs"], caches)
         with open(os.path.join(args.out, slug(key) + ".json"), "w") as f:
             json.dump(data, f, separators=(",", ":"))
         index.append({"key": key, "file": slug(key) + ".json"})
         print(key, {r["agent"]: r["kpis"]["profit"] for r in data["runs"]}, flush=True)
     with open(os.path.join(args.out, "index.json"), "w") as f:
-        json.dump({"default": DEFAULT, "agents": AGENTS, "seed": args.seed, "scenarios": index}, f, indent=1)
+        json.dump({"default": DEFAULT, "agents": [a for a, _ in AGENTS], "seed": args.seed, "scenarios": index}, f, indent=1)
 
 
 if __name__ == "__main__":
