@@ -164,6 +164,13 @@ The shipped `results/benchmark_final_merged.csv` was generated with:
   diagnostic only.
 - **Scenarios**: 26 (16 core + 4 stationary replication + 4 MARL + 2 M5)
 - **Seeds**: 10 canonical seeds per scenario (260 episodes per agent)
+- **MARL-mode rows**: The four supplemental `C_MARL` rows are excluded from the
+  22-scenario core aggregate, as in the paper. Their MARL flag is a label only:
+  the canonical runner evaluates every agent centrally and does not apply
+  `MultiAgentWrapper`, so these rows reproduce the matching `A_Core` rows
+  (no goodwill, backlog). Per-seed results are identical for every non-LLM
+  agent; `LLM-Policy-C` differs only through LLM sampling. The rows are kept so
+  the artifact matches the paper; decentralized evaluation is future work.
 - **Supplementary LLM diagnostics**: `LLM-ZS-Direct` and `LLM-InvAgent-C`
   require explicit LLM evaluation and are not part of the registered non-LLM
   roster. Stopped direct-prompting diagnostics are stored under
