@@ -32,4 +32,5 @@ jobs:
           tests/test_publication_artifacts.py \
           tests/test_roster_consistency.py \
           tests/test_wrappers.py \
+          tests/test_evaluate_custom.py \
           -q
