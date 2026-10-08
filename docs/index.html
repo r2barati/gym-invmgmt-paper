@@ -11,9 +11,7 @@
 <meta property="og:url" content="https://r2barati.github.io/gym-invmgmt-paper/">
 <meta property="og:image" content="https://r2barati.github.io/gym-invmgmt-paper/media/teaser-poster.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<link rel="preload" href="fonts/cmu-serif-500-roman.woff2" as="font" type="font/woff2" crossorigin>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -30,6 +28,12 @@
 }
 </script>
 <style>
+/* Computer Modern Unicode (Knuth's TeX typeface), self-hosted; SIL OFL, see fonts/OFL.txt. */
+@font-face { font-family: "CMU Serif"; src: url("fonts/cmu-serif-500-roman.woff2") format("woff2"); font-weight: 300 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "CMU Serif"; src: url("fonts/cmu-serif-500-italic.woff2") format("woff2"); font-weight: 300 500; font-style: italic; font-display: swap; }
+@font-face { font-family: "CMU Serif"; src: url("fonts/cmu-serif-700-roman.woff2") format("woff2"); font-weight: 600 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "CMU Typewriter Text"; src: url("fonts/cmu-typewriter-text-500-roman.woff2") format("woff2"); font-weight: 300 800; font-style: normal; font-display: swap; }
+
 /* Layout: a shipping-manifest page. Title block, the live simulation console as the one framed
    object, then results read top-down: ranking, stability under stress, reliability and cost,
    then the environment's contract and reference material. */
@@ -57,12 +61,12 @@
   --div-neg-lo: #f6d3d3; --div-neg-hi: #8f1d1d;
   --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4;
 
-  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
-  --f-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-prose: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-display: "CMU Serif", "Latin Modern Roman", "Computer Modern", Georgia, "Times New Roman", serif;
+  --f-ui: var(--f-display);
+  --f-prose: var(--f-display);
+  --f-mono: "CMU Typewriter Text", "Latin Modern Mono", "Courier New", ui-monospace, monospace;
 
-  --step--1: 0.8125rem; --step-0: 1rem; --step-1: 1.1875rem; --step-2: 1.5rem;
+  --step--1: 0.84rem; --step-0: 1.0625rem; --step-1: 1.1875rem; --step-2: 1.5rem;
   --step-3: 2.25rem; --step-4: clamp(2.75rem, 7vw, 4.75rem);
   --radius: 6px;
 }
@@ -100,10 +104,10 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 a:hover { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 .wrap { max-width: 1160px; margin: 0 auto; padding-inline: max(16px, 3vw); }
-h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: 0.005em; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: 0; }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; letter-spacing: 0; line-height: 1.3; }
-.label { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--muted); }
+.label { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 400; color: var(--muted); }
 .mono { font-family: var(--f-mono); }
 .num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
@@ -124,7 +128,7 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 .tag { font-family: var(--f-mono); font-size: 0.78rem; padding: 3px 8px; border: 1px solid var(--line-strong); border-radius: 3px; color: var(--ink-2); background: var(--surface); }
 .tag.venue { border-color: var(--accent); color: var(--accent); }
 .hero h1 { font-size: var(--step-4); }
-.hero .subtitle { font-family: var(--f-display); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 2rem); line-height: 1.15; color: var(--ink-2); max-width: 30ch; margin: 0; text-wrap: balance; }
+.hero .subtitle { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: clamp(1.35rem, 2.6vw, 2rem); line-height: 1.15; color: var(--ink-2); max-width: 40ch; margin: 0; text-wrap: balance; }
 .authors { margin: 0; font-size: 1.05rem; }
 .authors span { color: var(--muted); }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
@@ -171,18 +175,18 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 #net .edge { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
 #net .edge.retail { stroke: var(--ink-2); }
 #net .lt rect { fill: var(--surface); stroke: var(--line); }
-#net .lt text { font-family: var(--f-mono); font-size: 10px; fill: var(--muted); }
+#net .lt text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
 #net .node rect.box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
 #net .node.raw rect.box { fill: var(--bg); stroke-dasharray: 3 3; }
-#net .node .name { font-size: 11px; font-weight: 600; fill: var(--ink-2); letter-spacing: 0.04em; text-transform: uppercase; }
+#net .node .name { font-size: 12px; font-weight: 700; fill: var(--ink-2); letter-spacing: 0.03em; text-transform: uppercase; }
 #net .node .val { font-family: var(--f-mono); font-size: 15px; font-weight: 500; }
-#net .node .unit { font-size: 10px; fill: var(--muted); }
+#net .node .unit { font-size: 11px; fill: var(--muted); }
 #net .track { fill: var(--goods-wash); }
 #net .fill { fill: var(--goods); }
 #net .bfill { fill: var(--critical); }
 #net .btrack { fill: var(--critical-wash); }
 #net .dot { fill: var(--goods); stroke: var(--surface); stroke-width: 1.5; }
-#net .col-label { font-size: 10px; fill: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+#net .col-label { font-size: 11px; fill: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; }
 .transport { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .play { width: 42px; height: 42px; border-radius: 50%; border: none; background: var(--accent); color: var(--on-accent); cursor: pointer; display: grid; place-items: center; flex: none; }
 .play svg { width: 16px; height: 16px; fill: currentColor; }
@@ -200,7 +204,7 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.8rem; color: var(--ink-2); }
 .legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
 svg.plot { display: block; width: 100%; overflow: visible; }
-svg.plot text { font-family: var(--f-ui); font-size: 11px; fill: var(--muted); }
+svg.plot text { font-family: var(--f-ui); font-size: 12px; fill: var(--muted); }
 svg.plot .grid line { stroke: var(--line); }
 svg.plot .axis { stroke: var(--line-strong); }
 .caption { font-size: 0.88rem; color: var(--muted); margin: 0; max-width: 92ch; }

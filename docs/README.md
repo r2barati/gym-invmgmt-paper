@@ -10,6 +10,7 @@ folder by `.github/workflows/pages.yml` on every push to `main` that touches `do
 | `data/rollouts/` | Per-period state of eight policies (optimization, heuristic and learned) on each of the 22 main scenarios, at benchmark seed 42. One file per scenario plus `index.json`. |
 | `data/topologies.json` | The two benchmark networks and the YAML networks in `gym_invmgmt/topologies/`. |
 | `media/teaser.mp4`, `media/teaser-poster.png` | Teaser clip of the player for the README, slides and social posts. |
+| `fonts/` | Computer Modern Unicode (Serif and Typewriter) web fonts, self-hosted under the SIL Open Font License in `fonts/OFL.txt`. |
 | `scripts/` | Generators for everything in `data/` and `media/`. |
 
 Every number on the page is computed in the browser from these files, so regenerating
