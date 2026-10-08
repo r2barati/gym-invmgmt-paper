@@ -22,7 +22,19 @@ An open-source simulation framework bridging Operations Research (OR) and Machin
     canonical benchmark artifact.
   - `benchmark_final_merged.csv`: The canonical merged CSV consumed by all figure scripts.
 - `data/models/`: Pre-trained RL model checkpoints (hosted on HuggingFace — see below).
-- `paper/`: LaTeX source for the manuscript.
+
+## Which Path Do You Need?
+
+| Goal | Path | Requirements |
+|---|---|---|
+| Try the environment (about 5 minutes) | `pip install gym-invmgmt` and follow the [standalone package README](https://github.com/r2barati/gym-invmgmt) | CPU only, no checkpoints |
+| Reproduce the paper's results | [Reproducibility Quick-Start](#reproducibility-quick-start) below | `.[all]` extras, downloaded checkpoints, roughly 2 hours of evaluation time (mostly the MSSP solver agents; training excluded) |
+
+The bundled `gym_invmgmt/` module has the same environment dynamics as
+`gym-invmgmt` 0.2.x on PyPI; the differences are formatting and Python 3.8
+compatibility only. This repository installs as the `gym-invmgmt-paper`
+distribution but also provides the `gym_invmgmt` import name, so install it in
+a separate virtual environment from the PyPI package.
 
 ## Pre-trained Models
 
@@ -128,7 +140,7 @@ python3 run_benchmarks.py --agent ALL --include-llm
 To regenerate the merged CSV from per-agent caches:
 
 ```bash
-python3 run_benchmarks.py --merge
+python3 run_benchmarks.py --merge-only
 ```
 
 ## Training Agents
