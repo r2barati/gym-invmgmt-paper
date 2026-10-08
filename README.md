@@ -1,9 +1,12 @@
 # gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods
 
+**Project website:** [r2barati.github.io/gym-invmgmt-paper](https://r2barati.github.io/gym-invmgmt-paper/) (interactive leaderboard, episode replays, robustness analysis and documentation)
+
 An open-source simulation framework bridging Operations Research (OR) and Machine Learning (ML) for multi-echelon supply chain optimization.
 
 ## Project Links
 
+- Project website: [r2barati.github.io/gym-invmgmt-paper](https://r2barati.github.io/gym-invmgmt-paper/)
 - Paper/code repository: [r2barati/gym-invmgmt-paper](https://github.com/r2barati/gym-invmgmt-paper)
 - arXiv paper: [arXiv:2605.11355](https://arxiv.org/abs/2605.11355)
 - Standalone environment package: [r2barati/gym-invmgmt](https://github.com/r2barati/gym-invmgmt)
@@ -217,7 +220,14 @@ The shipped `results/benchmark_final_merged.csv` was generated with:
   generated with `--include-llm`; direct per-period LLM prompting variants are
   diagnostic only.
 - **Scenarios**: 26 (16 core + 4 stationary replication + 4 MARL + 2 M5)
-- **Seeds**: 10 canonical seeds per scenario (260 episodes per agent)
+- **Seeds**: 10 canonical seeds per scenario (260 episodes per configuration
+  that covers all 26 scenarios)
+- **Coverage**: The merged artifact represents 30 configurations (the 29
+  registered IDs plus `LLM-Policy-C`), but not every configuration is evaluated
+  on every scenario. `PPO-MLP-raw` has a base-network checkpoint only, so it
+  has results on the 13 base-network scenarios (130 episodes); the other 29
+  configurations cover all 26. In total, 767 of the 780 configuration-scenario
+  cells are populated, for 7,670 evaluated episodes.
 - **MARL-mode rows**: The four supplemental `C_MARL` rows are excluded from the
   22-scenario core aggregate, as in the paper. Their MARL flag is a label only:
   the canonical runner evaluates every agent centrally and does not apply

@@ -144,6 +144,8 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 .btn.primary .k { color: inherit; opacity: 0.8; }
 .facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 6px 0 0; padding: 0; list-style: none; color: var(--ink-2); }
 .facts b { font-family: var(--f-display); font-size: 1.6rem; color: var(--ink); font-weight: 700; margin-right: 6px; }
+.coverage { margin: 0; max-width: 92ch; font-size: 0.92rem; color: var(--muted); }
+.marl-note { margin: 0; max-width: 100ch; font-size: 0.9rem; color: var(--ink-2); border-left: 3px solid var(--accent); padding: 6px 12px; background: var(--accent-wash); border-radius: 0 4px 4px 0; }
 
 /* ── Simulation console ──────────────────────────────── */
 .console { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
@@ -415,6 +417,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <li><b>10</b>seeds each</li>
         <li><b id="f-episodes">7,670</b>evaluated episodes</li>
       </ul>
+      <p class="coverage" id="coverage">The 30 configurations are 1 Oracle upper bound, 22 primary agents, 6 ablations and 1 LLM baseline. Not every configuration is evaluated on every scenario: PPO-MLP-raw has a base-network checkpoint only (13 of 26 scenarios), so 767 of the 780 configuration-scenario cells are filled. The 26 scenarios include 4 MARL-mode rows that are evaluated centrally and duplicate core rows; they are excluded from the 22-scenario main results.</p>
     </div>
 
     <!-- ── Teaser: data-driven playback of real benchmark episodes ── -->
@@ -519,6 +522,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
         <label class="check"><input type="checkbox" id="f-abl"> Show ablations</label>
       </div>
+      <p class="marl-note" id="marl-note" hidden>This selection includes the 4 MARL-mode rows. They are labelled multi-agent, but every agent is evaluated centrally, so they reproduce the matching core rows (no goodwill, backorders) rather than testing decentralized control. Decentralized evaluation is future work.</p>
       <div class="scale">
         <span>Per-scenario profit vs Oracle:</span>
         <span class="mono">loss</span><span class="ramp" id="ramp"></span><span class="mono">100%</span>
@@ -1175,6 +1179,7 @@ python3 verify_publication_ready.py --quick</code></pre>
       try { localStorage.setItem("gim-board", JSON.stringify({ scn: state.scn, net: state.net, metric: state.metric, abl: state.abl })); } catch (e) {}
       $("#ramp").style.background = `linear-gradient(90deg, ${css("--div-neg-hi")}, ${css("--div-neg-lo")} 32%, ${css("--div-mid")} 34%, ${css("--div-pos-lo")} 36%, ${css("--div-pos-hi")})`;
       const idx = selection(), m = METRIC[state.metric];
+      $("#marl-note").hidden = !idx.some((i) => S[i].marl);
       $("#th-metric").textContent = m.label + (m.ci ? " · 95% CI" : "");
       const rows = A.filter((a) => state.abl || a.role !== "ablation").map((a) => ({ a, s: score(a, idx) }));
       const bound = rows.find((r) => r.a.id === "Oracle");
@@ -1336,7 +1341,14 @@ python3 verify_publication_ready.py --quick</code></pre>
         f(pctf(bRL.p), bRL.a.id, `Best learned policy, at ${tMean(bRL.a).toFixed(2)} s per episode.`) +
         f(pctf(bIL.p), bIL.a.id, `Best imitation learner: ${fmt0.format(blockPct(bIL.a, "B_PaperReplication") * 100)}% under stationary demand, ${fmt0.format(blockPct(bIL.a, "A_Core") * 100)}% once trend, seasonality and shocks enter.`) +
         f("τ = " + worstF.tau.toFixed(2), `${worstF.lo} → ${worstF.hi}`, `Rank agreement when only the ${worstF.name.toLowerCase()} changes. ${esc(mv.id)} moves from #${mv.loR} to #${mv.hiR}. <a href="#robustness">See all four factors</a>.`);
-      $("#f-episodes").textContent = fmt0.format(A.reduce((s, a) => s + a.results.filter((r) => r.profit !== null).length, 0) * NS);
+      const filled = A.reduce((s, a) => s + a.results.filter((r) => r.profit !== null).length, 0);
+      $("#f-episodes").textContent = fmt0.format(filled * NS);
+      const roleN = (r) => A.filter((a) => a.role === r).length, nMarl = S.filter((s) => s.marl).length;
+      const partial = A.map((a) => ({ id: a.id, n: a.results.filter((r) => r.profit !== null).length })).filter((x) => x.n < S.length);
+      const why = { "PPO-MLP-raw": " has a base-network checkpoint only" };
+      $("#coverage").textContent = `The ${A.length} configurations are ${roleN("bound")} Oracle upper bound, ${roleN("primary")} primary agents, ${roleN("ablation")} ablations and ${roleN("llm")} LLM baseline. ` +
+        (partial.length ? `Not every configuration is evaluated on every scenario: ${partial.map((x) => `${x.id}${why[x.id] || ""} (${x.n} of ${S.length} scenarios)`).join(", ")}, so ${fmt0.format(filled)} of the ${fmt0.format(A.length * S.length)} configuration-scenario cells are filled. ` : "Every configuration is evaluated on every scenario. ") +
+        `The ${S.length} scenarios include ${nMarl} MARL-mode rows that are evaluated centrally and duplicate core rows; they are excluded from the ${S.length - nMarl}-scenario main results.`;
     }
 
     // ── Performance profiles ───────────────────────────────
