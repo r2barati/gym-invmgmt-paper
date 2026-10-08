@@ -108,3 +108,12 @@ def test_cli_end_to_end(tmp_path):
     assert comparison['Pairs'].eq(2).all()
     assert info['tier'] == 'blind' and info['seeds'] == rb.CANONICAL_SEEDS[:2]
     assert info['policy_file_sha256']
+
+
+def test_default_scenarios_are_the_22_core_grid(tmp_path):
+    ec.main(['--policy', EXAMPLE_POLICY, '--tier', 'blind', '--seeds', '1',
+             '--baselines', 'Newsvendor', '--out-dir', str(tmp_path)])
+
+    episodes = pd.read_csv(tmp_path / 'episodes.csv')
+    assert episodes['ScenarioKey'].nunique() == 22
+    assert 'C_MARL' not in set(episodes['Block'])

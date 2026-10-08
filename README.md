@@ -64,10 +64,12 @@ pip install -e ".[all]"
 
 ## Evaluate Your Own Agent
 
-`benchmarks/evaluate_custom.py` runs your policy on the same 26 scenarios and
-10 canonical seeds as the paper and compares it, seed by seed, against the
+`benchmarks/evaluate_custom.py` runs your policy on the paper's 22-scenario core
+grid and 10 canonical seeds and compares it, seed by seed, against the
 published per-seed results in `results/cache_v2/`. The baselines are not
-re-run, so the base install (`pip install -e .`) is enough.
+re-run, so the base install (`pip install -e .`) is enough. Add
+`--blocks A_Core B_PaperReplication D_WalmartM5 C_MARL` to include the four
+supplemental MARL-mode rows.
 
 Write a class with the same call convention as the shipped agents:
 

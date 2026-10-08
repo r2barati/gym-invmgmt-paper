@@ -1,10 +1,11 @@
 """
 evaluate_custom.py — Evaluate your own policy on the canonical gym-invmgmt benchmark.
 
-Runs ONLY your agent on the paper's scenarios and canonical seeds, then compares
-it seed-by-seed against the published per-seed baseline results in
-results/cache_v2/. Baselines are not re-run, so no solver, checkpoint, or GPU
-is needed.
+Runs ONLY your agent on the paper's 22-scenario core grid and canonical seeds,
+then compares it seed-by-seed against the published per-seed baseline results
+in results/cache_v2/. Baselines are not re-run, so no solver, checkpoint, or
+GPU is needed. The supplemental C_MARL rows duplicate A_Core rows (see the
+README's Results Manifest) and run only when requested with --blocks C_MARL.
 
 Usage:
   python benchmarks/evaluate_custom.py --policy path/to/my_agent.py:MyAgent --tier blind
@@ -66,6 +67,9 @@ if SCRIPT_DIR not in sys.path:
 import run_benchmarks as rb  # noqa: E402
 
 TIERS = ('blind', 'informed')
+
+# The paper's 22-scenario core aggregate; C_MARL is supplemental.
+CORE_BLOCKS = ('A_Core', 'B_PaperReplication', 'D_WalmartM5')
 
 # Information tier of each published baseline (see _make_agent in run_benchmarks.py).
 BASELINE_TIERS = {
@@ -357,8 +361,9 @@ def main(argv=None):
     parser.add_argument('--name', default=None, help='Label for results (default: class name)')
     parser.add_argument('--seeds', type=int, default=len(rb.CANONICAL_SEEDS),
                         help=f'Number of canonical seeds (1-{len(rb.CANONICAL_SEEDS)}, default: all)')
-    parser.add_argument('--blocks', nargs='*', default=None,
-                        help='Scenario blocks to include (e.g. A_Core B_PaperReplication)')
+    parser.add_argument('--blocks', nargs='*', default=list(CORE_BLOCKS),
+                        help='Scenario blocks to include (default: the 22-scenario core grid, '
+                             f'{" ".join(CORE_BLOCKS)}; add C_MARL for the supplemental rows)')
     parser.add_argument('--baselines', nargs='*', default=None,
                         help='Baseline IDs to compare against (default: all with cached results)')
     parser.add_argument('--out-dir', default=None,
@@ -370,11 +375,9 @@ def main(argv=None):
                      'published baselines exist only for the canonical seeds')
     seeds = rb.CANONICAL_SEEDS[:args.seeds]
 
-    scenarios = rb.build_all_scenarios()
-    if args.blocks:
-        scenarios = [s for s in scenarios if s['block'] in args.blocks]
-        if not scenarios:
-            parser.error(f'no scenarios match --blocks {args.blocks}')
+    scenarios = [s for s in rb.build_all_scenarios() if s['block'] in args.blocks]
+    if not scenarios:
+        parser.error(f'no scenarios match --blocks {args.blocks}')
 
     baseline_ids = args.baselines or list(BASELINE_TIERS)
     unknown = [b for b in baseline_ids if load_baseline(b) is None]
@@ -399,11 +402,14 @@ def main(argv=None):
 
     cols = ['Agent', 'Tier', 'Scenarios', 'MeanProfit', 'MeanFillRate', 'MeanOptGap_Pct',
             'CustomMinusBaseline', 'Wins', 'Ties', 'Losses', 'Wilcoxon_p']
+    display = summary[cols].copy()
+    for col in ('Wins', 'Ties', 'Losses'):
+        display[col] = display[col].map(lambda v: '-' if pd.isna(v) else str(int(v)))
     with pd.option_context('display.width', 170, 'display.max_rows', 100,
                            'display.float_format', '{:,.3f}'.format):
         print("\nSummary (paired on matched scenario x seed; Oracle is a "
               "perfect-information upper bound, not a deployable method):\n")
-        print(summary[cols].to_string(index=False, na_rep='-'))
+        print(display.to_string(index=False, na_rep='-'))
     print(f"\nWins/Ties/Losses count scenarios where the 95% CI of "
           f"({name} - baseline) profit is above/overlapping/below zero.")
     print("Baselines covering fewer scenarios are averaged over those scenarios only; "
