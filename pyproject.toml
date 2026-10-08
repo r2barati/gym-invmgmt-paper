@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gym-invmgmt"
+name = "gym-invmgmt-paper"
 version = "0.1.0"
 authors = [
   { name = "Reza Barati", email = "r2barati@torontomu.ca" }
