@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>gym-invmgmt Benchmark</title>
-<meta name="description" content="gym-invmgmt: an open benchmarking framework for inventory management methods. Watch policies run a multi-echelon supply chain, compare 30 agent configurations across 26 scenarios, and reproduce the results.">
+<meta name="description" content="gym-invmgmt: an open benchmarking framework for inventory management methods. Watch policies run a multi-echelon supply chain, compare 30 agent configurations across 26 scenarios with confidence intervals, and see how rankings shift with the test conditions.">
 <meta property="og:title" content="gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods">
 <meta property="og:description" content="Optimization, heuristic, RL, imitation and LLM inventory policies under one shared simulation contract. 26 scenarios, 10 seeds, open results.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://r2barati.github.io/gym-invmgmt-paper/">
+<meta property="og:image" content="https://r2barati.github.io/gym-invmgmt-paper/media/teaser-poster.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,8 +30,9 @@
 }
 </script>
 <style>
-/* Layout: a shipping-manifest page. Title block, then the live simulation console as the
-   one framed object, then the ranked leaderboard, then plain reference sections. */
+/* Layout: a shipping-manifest page. Title block, the live simulation console as the one framed
+   object, then results read top-down: ranking, stability under stress, reliability and cost,
+   then the environment's contract and reference material. */
 :root {
   color-scheme: light;
   --bg: #f3f5f8;
@@ -45,15 +47,15 @@
   --on-accent: #ffffff;
   --goods: #2a78d6;           /* stock and shipments: anything that is physical units */
   --goods-wash: rgba(42, 120, 214, 0.12);
-  --critical: #d03b3b;        /* backlog and losses */
+  --up: #2a78d6;              /* better than reference */
+  --critical: #d03b3b;        /* backlog, losses, worse than reference */
   --critical-wash: rgba(208, 59, 59, 0.12);
   --other-line: #a3adbb;
   --code-bg: #eef1f5;
   --div-mid: #eceff3;
   --div-pos-lo: #cde2fb; --div-pos-hi: #104281;
   --div-neg-lo: #f6d3d3; --div-neg-hi: #8f1d1d;
-  --fam-oracle: #0f1724; --fam-or: #2a78d6; --fam-heur: #eb6834; --fam-rl: #1baf7a;
-  --fam-il: #eda100; --fam-llm: #e87ba4;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4;
 
   --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --f-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -69,28 +71,26 @@
     color-scheme: dark;
     --bg: #0c1117; --surface: #131a23; --ink: #e7ecf2; --ink-2: #a9b4c2; --muted: #8592a3;
     --line: #222c38; --line-strong: #334152; --accent: #f07a3e; --accent-wash: rgba(240, 122, 62, 0.12);
-    --on-accent: #0c1117; --goods: #5598e7; --goods-wash: rgba(85, 152, 231, 0.16);
+    --on-accent: #0c1117; --goods: #5598e7; --goods-wash: rgba(85, 152, 231, 0.16); --up: #5598e7;
     --critical: #e66767; --critical-wash: rgba(230, 103, 103, 0.16); --other-line: #4f5b6d;
     --code-bg: #18212c; --div-mid: #26303c;
     --div-pos-lo: #1f3a5c; --div-pos-hi: #9ec5f4; --div-neg-lo: #4a2326; --div-neg-hi: #f19292;
-    --fam-oracle: #e7ecf2; --fam-or: #3987e5; --fam-heur: #d95926; --fam-rl: #199e70;
-    --fam-il: #c98500; --fam-llm: #d55181;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0c1117; --surface: #131a23; --ink: #e7ecf2; --ink-2: #a9b4c2; --muted: #8592a3;
   --line: #222c38; --line-strong: #334152; --accent: #f07a3e; --accent-wash: rgba(240, 122, 62, 0.12);
-  --on-accent: #0c1117; --goods: #5598e7; --goods-wash: rgba(85, 152, 231, 0.16);
+  --on-accent: #0c1117; --goods: #5598e7; --goods-wash: rgba(85, 152, 231, 0.16); --up: #5598e7;
   --critical: #e66767; --critical-wash: rgba(230, 103, 103, 0.16); --other-line: #4f5b6d;
   --code-bg: #18212c; --div-mid: #26303c;
   --div-pos-lo: #1f3a5c; --div-pos-hi: #9ec5f4; --div-neg-lo: #4a2326; --div-neg-hi: #f19292;
-  --fam-oracle: #e7ecf2; --fam-or: #3987e5; --fam-heur: #d95926; --fam-rl: #199e70;
-  --fam-il: #c98500; --fam-llm: #d55181;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181;
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 64px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
@@ -106,23 +106,24 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 .label { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--muted); }
 .mono { font-family: var(--f-mono); }
 .num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
 
 /* ── Top bar ─────────────────────────────────────────── */
 .topbar { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; }
 .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px; }
-.wordmark { font-family: var(--f-mono); font-weight: 500; font-size: 0.95rem; text-decoration: none; }
+.wordmark { font-family: var(--f-mono); font-weight: 500; font-size: 0.95rem; text-decoration: none; white-space: nowrap; }
 .wordmark b { color: var(--accent); font-weight: 500; }
-.topnav { display: flex; gap: 20px; font-size: 0.95rem; flex-wrap: wrap; justify-content: flex-end; }
+.topnav { display: flex; gap: 18px; font-size: 0.95rem; flex-wrap: wrap; justify-content: flex-end; }
 .topnav a { text-decoration: none; color: var(--ink-2); }
 .topnav a:hover { color: var(--accent); }
-@media (max-width: 620px) { .topnav a.opt { display: none; } }
+@media (max-width: 760px) { .topnav a.opt { display: none; } }
 
 /* ── Title block ─────────────────────────────────────── */
 .hero { padding-block: 44px 28px; display: grid; gap: 18px; }
 .tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag { font-family: var(--f-mono); font-size: 0.78rem; padding: 3px 8px; border: 1px solid var(--line-strong); border-radius: 3px; color: var(--ink-2); background: var(--surface); }
 .tag.venue { border-color: var(--accent); color: var(--accent); }
-.hero h1 { font-size: var(--step-4); text-transform: none; }
+.hero h1 { font-size: var(--step-4); }
 .hero .subtitle { font-family: var(--f-display); font-weight: 600; font-size: clamp(1.35rem, 2.6vw, 2rem); line-height: 1.15; color: var(--ink-2); max-width: 30ch; margin: 0; text-wrap: balance; }
 .authors { margin: 0; font-size: 1.05rem; }
 .authors span { color: var(--muted); }
@@ -144,8 +145,10 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 
 /* ── Simulation console ──────────────────────────────── */
 .console { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
-.console-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.console-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .console-head p { margin: 2px 0 0; color: var(--ink-2); font-size: 0.95rem; }
+.console-tools { display: grid; gap: 6px; min-width: 0; flex: 0 1 340px; }
+.console-tools select { width: 100%; }
 .agents { display: flex; flex-wrap: wrap; gap: 6px; }
 .agent-btn {
   font: 500 0.9rem/1 var(--f-ui); padding: 8px 11px; border-radius: var(--radius); cursor: pointer;
@@ -165,7 +168,7 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 #net { display: block; width: 100%; min-width: 700px; height: auto; }
 #net text { font-family: var(--f-ui); fill: var(--ink); }
 #net .edge { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
-#net .edge.retail { stroke: var(--ink-2); stroke-dasharray: none; }
+#net .edge.retail { stroke: var(--ink-2); }
 #net .lt rect { fill: var(--surface); stroke: var(--line); }
 #net .lt text { font-family: var(--f-mono); font-size: 10px; fill: var(--muted); }
 #net .node rect.box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
@@ -195,41 +198,48 @@ h3 { font-size: var(--step-1); font-family: var(--f-ui); font-weight: 600; lette
 .chart-head h3 { font-size: 0.98rem; }
 .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.8rem; color: var(--ink-2); }
 .legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
-.chart svg { display: block; width: 100%; overflow: visible; }
-.chart svg text { font-family: var(--f-ui); font-size: 11px; fill: var(--muted); }
-.chart .grid line { stroke: var(--line); }
-.chart .axis { stroke: var(--line-strong); }
+svg.plot { display: block; width: 100%; overflow: visible; }
+svg.plot text { font-family: var(--f-ui); font-size: 11px; fill: var(--muted); }
+svg.plot .grid line { stroke: var(--line); }
+svg.plot .axis { stroke: var(--line-strong); }
 .caption { font-size: 0.88rem; color: var(--muted); margin: 0; max-width: 92ch; }
 .caption code { font-size: 0.82rem; }
 
 #tip {
   position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface);
-  font: 500 0.8rem/1.4 var(--f-ui); padding: 7px 9px; border-radius: 5px; max-width: 260px;
+  font: 500 0.8rem/1.4 var(--f-ui); padding: 7px 9px; border-radius: 5px; max-width: 280px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.18);
 }
 #tip .t { font-family: var(--f-mono); font-size: 0.72rem; opacity: 0.75; display: block; margin-bottom: 2px; }
 
 /* ── Sections ────────────────────────────────────────── */
-section.block { padding-block: 56px 8px; display: grid; gap: 18px; }
+section.block { padding-block: 64px 8px; display: grid; gap: 18px; }
 .hero > *, .console > *, section.block > * { min-width: 0; }
-.section-head { display: grid; gap: 8px; max-width: 75ch; }
+.section-head { display: grid; gap: 8px; max-width: 78ch; }
 .section-head p { margin: 0; color: var(--ink-2); }
 .prose { font-family: var(--f-prose); font-size: 1.12rem; line-height: 1.65; max-width: 68ch; margin: 0; }
-.findings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line-strong); }
+.findings { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line-strong); }
 .finding { padding: 14px 18px 4px 0; display: grid; gap: 4px; align-content: start; min-width: 0; }
 .finding + .finding { padding-left: 18px; border-left: 1px solid var(--line); }
 .finding .big { font-family: var(--f-display); font-size: 2.4rem; font-weight: 700; line-height: 1; }
 .finding .who { font-family: var(--f-mono); font-size: 0.9rem; }
 .finding p { margin: 0; color: var(--ink-2); font-size: 0.93rem; }
-@media (max-width: 760px) {
+@media (max-width: 960px) {
+  .findings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .finding:nth-child(3) { padding-left: 0; border-left: none; }
+  .finding:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 560px) {
   .findings { grid-template-columns: minmax(0, 1fr); }
   .finding + .finding { padding-left: 0; border-left: none; border-top: 1px solid var(--line); }
 }
-.grid-table { overflow-x: auto; }
+.x-scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; }
 .scen th, .scen td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.93rem; }
 .scen th { font-weight: 600; color: var(--muted); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
 .scen td.n { font-family: var(--f-display); font-size: 1.35rem; font-weight: 700; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel > * { min-width: 0; }
 
 /* ── Leaderboard ─────────────────────────────────────── */
 .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
@@ -239,37 +249,107 @@ table { border-collapse: collapse; width: 100%; }
 .seg button:last-child { border-right: none; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 .seg button .c { font-family: var(--f-mono); font-size: 0.74rem; opacity: 0.7; margin-left: 4px; }
-select { font: 500 0.9rem/1 var(--f-ui); padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); color: var(--ink); }
+select { font: 500 0.9rem/1 var(--f-ui); padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); color: var(--ink); max-width: 100%; }
 .check { display: inline-flex; align-items: center; gap: 7px; font-size: 0.9rem; color: var(--ink-2); cursor: pointer; padding-block: 7px; }
 .check input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
 .board-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-.board { min-width: 820px; }
+.board { min-width: 880px; }
 .board th { text-align: left; font-size: var(--step--1); font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
 .board td { padding: 7px 12px; border-bottom: 1px solid var(--line); font-size: 0.92rem; vertical-align: middle; white-space: nowrap; }
-.board tr:last-child td { border-bottom: none; }
+.board tr.row { cursor: pointer; }
+.board tr.row:hover td { background: var(--accent-wash); }
+.board tr.row[aria-expanded="true"] td { background: var(--accent-wash); border-bottom-color: transparent; }
 .board tr.bound td { background: var(--bg); }
 .board td.rank { font-family: var(--f-mono); color: var(--muted); width: 44px; }
 .board td.agent { font-family: var(--f-mono); font-weight: 500; }
+.board td.agent .chev { display: inline-block; width: 10px; color: var(--muted); transition: transform 0.15s; margin-right: 6px; font-family: var(--f-ui); }
+.board tr.row[aria-expanded="true"] .chev { transform: rotate(90deg); }
 .board td.agent .note { font-family: var(--f-ui); font-weight: 400; color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
-.fam { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
-.fam i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.fam { color: var(--ink-2); }
 .access { font-size: 0.8rem; padding: 2px 7px; border-radius: 3px; border: 1px solid var(--line-strong); color: var(--ink-2); }
 .access.blind { border-style: dashed; }
-.score { display: grid; grid-template-columns: 120px 64px; align-items: center; gap: 10px; }
-.bar { position: relative; height: 10px; }
+.score { display: grid; grid-template-columns: 112px 58px 46px; align-items: center; gap: 8px; }
+.bar { position: relative; height: 12px; }
 .bar .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--line-strong); }
-.bar .b { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
-.bar .b.pos { background: var(--ink-2); }
-.bar .b.neg { background: var(--critical); }
-tr.bound .bar .b.pos { background: var(--muted); }
+.bar .b { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; }
+.bar .b.pos { background: var(--ink-2); opacity: 0.55; }
+.bar .b.neg { background: var(--critical); opacity: 0.7; }
+.bar .ci { position: absolute; top: 5px; height: 2px; background: var(--ink); }
+.bar .ci::before, .bar .ci::after { content: ""; position: absolute; top: -4px; width: 1.5px; height: 10px; background: var(--ink); }
+.bar .ci::before { left: 0; } .bar .ci::after { right: 0; }
 .score .val { font-family: var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.score .pm { font-family: var(--f-mono); font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .strip { display: flex; gap: 2px; align-items: center; }
-.strip span { width: 11px; height: 18px; border-radius: 2px; display: inline-block; }
+.strip span { width: 10px; height: 18px; border-radius: 2px; display: inline-block; }
 .strip span.gap { width: 6px; background: none !important; }
 .strip span.na { background: repeating-linear-gradient(45deg, var(--line) 0 2px, transparent 2px 4px); }
 .scale { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--muted); flex-wrap: wrap; }
 .scale .ramp { width: 180px; height: 10px; border-radius: 2px; }
 .board-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 0.86rem; color: var(--muted); }
+.method-note { font-size: 0.86rem; color: var(--muted); margin: 0; max-width: 100ch; }
+.board tr.detail td { padding: 0 12px 18px; background: var(--accent-wash); white-space: normal; }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) minmax(0, 1.25fr); gap: 22px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+@media (max-width: 1000px) { .detail-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .detail-grid > :first-child { grid-column: 1 / -1; } }
+.detail-grid h4 { margin: 0 0 6px; font: 600 0.88rem/1.3 var(--f-ui); color: var(--ink); }
+.detail-grid p { margin: 0 0 8px; font-size: 0.9rem; color: var(--ink-2); }
+.detail-grid p.small { font-size: 0.82rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip { font-size: 0.78rem; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--line-strong); color: var(--ink-2); }
+
+/* ── Robustness ──────────────────────────────────────── */
+.factors { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .factors { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.factor { text-align: left; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 12px 14px; cursor: pointer; display: grid; gap: 2px; font: inherit; min-width: 0; }
+.factor[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.factor .what { font-size: 0.86rem; color: var(--ink-2); }
+.factor .tau { font-family: var(--f-display); font-size: 2rem; font-weight: 700; line-height: 1.05; }
+.factor .tau small { font-family: var(--f-ui); font-size: 0.82rem; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.factor .mv { font-size: 0.82rem; color: var(--muted); }
+.slope-wrap { overflow-x: auto; }
+#slope { min-width: 400px; }
+#slope .lbl { font-size: 12px; fill: var(--ink-2); font-family: var(--f-mono); }
+@media (max-width: 560px) { #slope .lbl { font-size: 10.5px; } }
+#slope .lbl.hi { fill: var(--ink); font-weight: 500; }
+#slope .val { fill: var(--muted); }
+#slope .head { font-size: 11px; fill: var(--muted); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--f-ui); }
+#slope g.r.dim { opacity: 0.2; }
+
+/* ── Reliability & cost ─────────────────────────────── */
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.panel h3 { font-size: 1.05rem; }
+.panel .sub { margin: 4px 0 10px; font-size: 0.88rem; color: var(--ink-2); }
+.pick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+.pchip { display: inline-flex; align-items: center; gap: 6px; font: 500 0.82rem/1 var(--f-mono); padding: 5px 8px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.pchip i { width: 12px; height: 3px; border-radius: 1px; display: inline-block; }
+.pchip span.x { color: var(--muted); font-family: var(--f-ui); }
+.pick select { font-size: 0.82rem; padding: 5px 8px; }
+
+/* ── Environment ─────────────────────────────────────── */
+.env-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 900px) { .env-grid { grid-template-columns: minmax(0, 1fr); } }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 0.93rem; color: var(--ink-2); }
+ol.steps li::before { content: counter(s); font-family: var(--f-display); font-weight: 700; font-size: 1.3rem; color: var(--accent); line-height: 1.1; }
+ol.steps b { color: var(--ink); font-weight: 600; }
+dl.spec { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; font-size: 0.93rem; }
+dl.spec dt { color: var(--muted); font-weight: 600; font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 2px; }
+dl.spec dd { margin: 0; color: var(--ink-2); }
+.formula { font-family: var(--f-mono); font-size: 0.86rem; background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; overflow-x: auto; white-space: nowrap; color: var(--ink); line-height: 1.8; }
+.topos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .topos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .topos { grid-template-columns: minmax(0, 1fr); } }
+.topo { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.topo svg { width: 100%; height: auto; display: block; }
+.topo svg .e { fill: none; stroke: var(--line-strong); stroke-width: 1.3; }
+.topo svg .n { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.2; }
+.topo svg .n.raw { stroke-dasharray: 2.5 2; stroke: var(--muted); fill: var(--bg); }
+.topo svg .n.mkt { fill: var(--ink-2); stroke: none; }
+.topo h4 { margin: 0; font: 600 0.95rem/1.3 var(--f-ui); }
+.topo .meta { font-family: var(--f-mono); font-size: 0.76rem; color: var(--muted); overflow-wrap: anywhere; }
+.topo p { margin: 0; font-size: 0.86rem; color: var(--ink-2); }
+.topo-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); align-items: center; }
+.topo-key svg { width: 18px; height: 14px; vertical-align: -2px; margin-right: 5px; }
 
 /* ── Get started / cite ─────────────────────────────── */
 .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
@@ -278,7 +358,7 @@ tr.bound .bar .b.pos { background: var(--muted); }
 .step p { margin: 0; color: var(--ink-2); }
 pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; overflow-x: auto; font: 400 0.84rem/1.6 var(--f-mono); color: var(--ink); }
 code { font-family: var(--f-mono); }
-p code, li code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.88em; }
+p code, li code, dd code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.88em; }
 .planned { font-family: var(--f-mono); font-size: 0.72rem; border: 1px dashed var(--line-strong); color: var(--muted); padding: 1px 6px; border-radius: 3px; margin-left: 8px; vertical-align: 2px; text-transform: none; letter-spacing: 0; }
 .cite-box { position: relative; }
 .copy { position: absolute; top: 8px; right: 8px; }
@@ -294,7 +374,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <a class="wordmark" href="#top">gym<b>-</b>invmgmt</a>
     <nav class="topnav" aria-label="Sections">
       <a href="#sim">Simulation</a>
-      <a href="#leaderboard">Leaderboard</a>
+      <a href="#results">Results</a>
+      <a href="#robustness" class="opt">Robustness</a>
+      <a href="#environment" class="opt">Environment</a>
       <a href="#start" class="opt">Get started</a>
       <a href="#cite" class="opt">Cite</a>
       <a href="https://github.com/r2barati/gym-invmgmt-paper">GitHub</a>
@@ -332,26 +414,30 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       </ul>
     </div>
 
-    <!-- ── Teaser: data-driven playback of a real benchmark rollout ── -->
+    <!-- ── Teaser: data-driven playback of real benchmark episodes ── -->
     <section id="sim" class="console" aria-labelledby="sim-title">
       <div class="console-head">
         <div>
-          <span class="label">Live rollout · seed 0</span>
-          <h2 id="sim-title" style="font-size: var(--step-2)">Four policies, one supply chain, thirty periods</h2>
-          <p id="sim-scn">Base network · trend + seasonal + shock demand · backorders allowed</p>
+          <span class="label" id="sim-eyebrow">Benchmark episode · seed 42</span>
+          <h2 id="sim-title" style="font-size: var(--step-2)">Five policies, one supply chain, thirty periods</h2>
+          <p id="sim-scn">Base network · trend + seasonal + shock demand · backorders</p>
         </div>
-        <div class="agents" id="agents" role="group" aria-label="Policy to show"></div>
+        <div class="console-tools">
+          <label class="label" for="scn-select">Scenario</label>
+          <select id="scn-select"></select>
+        </div>
       </div>
+      <div class="agents" id="agents" role="group" aria-label="Policy to show"></div>
 
       <div class="kpis" aria-live="off">
         <div class="kpi"><div class="label">Period</div><div class="v num" id="k-period">1<small>of 30</small></div></div>
         <div class="kpi"><div class="label">Cumulative profit</div><div class="v num" id="k-profit">0</div></div>
-        <div class="kpi"><div class="label">Customer backlog</div><div class="v num" id="k-backlog">0<small>units</small></div></div>
+        <div class="kpi"><div class="label" id="k-back-label">Customer backlog</div><div class="v num" id="k-backlog">0<small>units</small></div></div>
         <div class="kpi"><div class="label">On-hand inventory</div><div class="v num" id="k-inv">0<small>units</small></div></div>
       </div>
 
       <div class="net-scroll">
-        <svg id="net" viewBox="0 0 1000 420" role="img" aria-label="Supply network: raw material suppliers feed three factories, which feed two distributors, which feed one retailer serving the market. Dots are shipments in transit, sized by quantity."></svg>
+        <svg id="net" viewBox="0 0 1000 420" role="img" aria-label="Supply network diagram. Raw material suppliers feed factories, which feed distributors, which feed the retailer serving the market. Dots are shipments in transit, sized by quantity."></svg>
       </div>
 
       <div class="transport">
@@ -373,17 +459,17 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
             <h3>Cumulative profit</h3>
             <div class="legend"><span><i style="background:var(--accent)"></i><span id="lg-agent">Oracle</span></span><span><i style="background:var(--other-line)"></i>other policies</span></div>
           </div>
-          <svg id="ch-profit" height="200" aria-label="Cumulative profit by period for the four policies"></svg>
+          <svg id="ch-profit" class="plot" height="200" aria-label="Cumulative profit by period for each policy"></svg>
         </div>
         <div class="chart">
           <div class="chart-head">
-            <h3>Retail demand and backlog</h3>
-            <div class="legend"><span><i style="background:var(--other-line)"></i>demand per period</span><span><i style="background:var(--critical)"></i>backlog</span></div>
+            <h3>Retail demand and <span id="lg-unmet">backlog</span></h3>
+            <div class="legend"><span><i style="background:var(--other-line)"></i>demand per period</span><span><i style="background:var(--critical)"></i><span id="lg-unmet2">backlog</span></span></div>
           </div>
-          <svg id="ch-demand" height="200" aria-label="Customer demand per period and the selected policy's backlog"></svg>
+          <svg id="ch-demand" class="plot" height="200" aria-label="Customer demand per period and the selected policy's unmet demand"></svg>
         </div>
       </div>
-      <p class="caption">Every dot is a real shipment from the benchmark environment. Dot area scales with units shipped, and each dot reaches its destination after that link's lead time <span class="mono">L</span> (in periods). Generated by <code>docs/scripts/export_rollouts.py</code>; no RL checkpoints are needed for these four policies. Click a chart to jump to a period; space bar plays and pauses.</p>
+      <p class="caption">Each replay is the benchmark's own seed-42 episode for that scenario; final profits match <code>results/cache_v2</code> to within rounding. Every dot is a real shipment: its area scales with units shipped, and it reaches its destination after that link's lead time <span class="mono">L</span> in periods. Generated by <code>docs/scripts/export_rollouts.py</code>. Click a chart to jump to a period; the space bar plays and pauses.</p>
     </section>
 
     <!-- ── Overview ── -->
@@ -395,13 +481,13 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <!-- Replace with the arXiv abstract before publishing. -->
       <p class="prose">Head-to-head inventory results depend on the test conditions almost as much as on the policy. gym-invmgmt evaluates optimization, heuristic, reinforcement-learning, imitation and LLM controllers under one shared contract: the same transition dynamics, reward, action bounds and KPIs. It then varies the stress conditions, including network topology, demand dynamics, customer goodwill and shortage handling, across a 22-scenario main grid plus four multi-agent rows.</p>
       <div class="findings" id="findings" aria-live="polite"></div>
-      <div class="grid-table">
+      <div class="x-scroll">
         <table class="scen">
           <thead><tr><th>Block</th><th>Scenarios</th><th>What varies</th></tr></thead>
           <tbody>
-            <tr><td>A · Core grid</td><td class="n">16</td><td>2 networks (base, serial) × 2 demand regimes (trend + seasonal, with or without shock) × goodwill on/off × backorders vs lost sales</td></tr>
-            <tr><td>B · Stationary replication</td><td class="n">4</td><td>Stationary demand, 2 networks × backorders vs lost sales, matching the OR-Gym lineage</td></tr>
-            <tr><td>D · Walmart M5</td><td class="n">2</td><td>Real volatile demand trace from the M5 dataset on both networks</td></tr>
+            <tr><td>A · Core grid</td><td class="n">16</td><td>2 networks (base, serial) × 2 demand regimes (trend + seasonal, with or without a shock) × goodwill on or off × backorders or lost sales</td></tr>
+            <tr><td>B · Stationary replication</td><td class="n">4</td><td>Stationary Poisson demand, 2 networks × backorders or lost sales, matching the OR-Gym lineage</td></tr>
+            <tr><td>D · Walmart M5</td><td class="n">2</td><td>A real volatile demand trace from the M5 dataset on both networks</td></tr>
             <tr><td>C · Multi-agent (supplementary)</td><td class="n">4</td><td>Each node acts independently; 2 networks × 2 demand regimes, backorders</td></tr>
           </tbody>
         </table>
@@ -409,18 +495,19 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     </section>
 
     <!-- ── Leaderboard ── -->
-    <section class="block" id="leaderboard" aria-labelledby="lb-title">
+    <section class="block" id="results" aria-labelledby="lb-title">
       <div class="section-head">
         <span class="label">Benchmark results</span>
         <h2 id="lb-title">Leaderboard</h2>
-        <p>Averages over 10 seeds per scenario, read from <code>results/benchmark_final_merged.csv</code>. The Oracle plans with perfect knowledge of future demand, so it is shown as an upper bound and not ranked.</p>
+        <p>Ten seeds per scenario, read from <code>results/benchmark_final_merged.csv</code> and the per-seed caches. The Oracle plans with perfect knowledge of future demand, so it is an upper bound and is not ranked. Select a row to see the method, its per-scenario results and where its profit gap comes from.</p>
       </div>
       <div class="controls">
         <div class="ctl"><span class="label" id="l-scn">Scenarios</span><div class="seg" id="f-scn" role="group" aria-labelledby="l-scn"></div></div>
         <div class="ctl"><span class="label" id="l-net">Network</span><div class="seg" id="f-net" role="group" aria-labelledby="l-net"></div></div>
         <div class="ctl"><label class="label" for="f-metric">Rank by</label>
           <select id="f-metric">
-            <option value="pct">Profit, % of Oracle</option>
+            <option value="pct">Profit, % of Oracle (mean)</option>
+            <option value="iqm">Profit, % of Oracle (IQM)</option>
             <option value="profit">Mean profit</option>
             <option value="cvar5">CVaR 5% profit (worst-case tail)</option>
             <option value="fill_rate">Fill rate</option>
@@ -445,6 +532,90 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <span id="board-n"></span>
         <span><a href="https://github.com/r2barati/gym-invmgmt-paper/blob/main/results/benchmark_final_merged.csv">Download the full CSV</a> · <span class="planned">planned</span> Submit your agent</span>
       </div>
+      <p class="method-note">% of Oracle is computed per episode against the Oracle on the same demand seed. Whiskers are 95% intervals from a stratified bootstrap that resamples seeds within each scenario (1,000 resamples), so they measure seed noise for a fixed set of scenarios. IQM is the mean of the middle 50% of episodes, which is less sensitive to rare collapses (Agarwal et al., 2021). Informed agents read the true mean of the demand process; blind agents estimate it from realized demand.</p>
+    </section>
+
+    <!-- ── Robustness ── -->
+    <section class="block" id="robustness" aria-labelledby="rb-title">
+      <div class="section-head">
+        <span class="label">Robustness</span>
+        <h2 id="rb-title">Does the ranking survive a change of conditions?</h2>
+        <p>The 16-scenario core grid crosses four factors. For each factor, the 23 primary agents are ranked separately on the 8 scenarios at each level, so the other three factors stay balanced. Kendall's τ compares the two rankings: 1 means the same order, 0 means no relation. <span id="rb-noise"></span></p>
+      </div>
+      <div class="factors" id="factors" role="group" aria-label="Factor to compare"></div>
+      <div class="panel">
+        <div class="chart-head">
+          <h3 id="slope-title">Rank by mean % of Oracle</h3>
+          <div class="legend"><span><i style="background:var(--up)"></i>rises 5+ places</span><span><i style="background:var(--critical)"></i>falls 5+ places</span><span><i style="background:var(--other-line)"></i>moves less</span></div>
+        </div>
+        <div class="slope-wrap"><svg id="slope" class="plot" role="img" aria-label="Slope chart of agent ranks under the two levels of the selected factor"></svg></div>
+      </div>
+    </section>
+
+    <!-- ── Reliability and cost ── -->
+    <section class="block" id="tradeoffs" aria-labelledby="tr-title">
+      <div class="section-head">
+        <span class="label">Reliability and cost</span>
+        <h2 id="tr-title">How often, and at what compute cost</h2>
+        <p>Both charts follow the leaderboard's scenario selection, currently <b id="tr-sel">main scenarios</b>.</p>
+      </div>
+      <div class="two">
+        <div class="panel">
+          <h3>Performance profile</h3>
+          <p class="sub">Share of episodes that reach at least a given fraction of the Oracle's profit. A curve that stays high further to the right holds up in more episodes.</p>
+          <div class="pick" id="pp-pick"></div>
+          <svg id="ch-pp" class="plot" height="260" aria-label="Performance profiles of the selected agents"></svg>
+        </div>
+        <div class="panel">
+          <h3>Profit against compute</h3>
+          <p class="sub">Mean % of Oracle against wall-clock seconds per 30-period episode, on a log scale. Inference only; training time is not included. Highlighted agents are not beaten on both axes by any other agent.</p>
+          <svg id="ch-fr" class="plot" height="300" aria-label="Scatter of mean percent of Oracle profit against seconds per episode"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Environment ── -->
+    <section class="block" id="environment" aria-labelledby="env-title">
+      <div class="section-head">
+        <span class="label">Environment</span>
+        <h2 id="env-title">The contract every method plays under</h2>
+        <p>One Gymnasium environment, <code>CoreEnv</code>, defines the dynamics, reward and KPIs for every agent. Agents differ only in how they choose orders.</p>
+      </div>
+      <div class="env-grid">
+        <div class="panel">
+          <h3 style="margin-bottom:12px">One period, in order</h3>
+          <ol class="steps">
+            <li><span><b>Place orders.</b> One quantity per reorder link. Each order is filled only up to the supplier's on-hand stock, or a factory's production capacity.</span></li>
+            <li><span><b>Receive deliveries.</b> An order placed at period <i>t</i> on a link with lead time <i>L</i> arrives at period <i>t</i> + <i>L</i>; until then it is pipeline inventory.</span></li>
+            <li><span><b>Realize demand.</b> Customers buy from the retailer's stock. Unmet demand is either carried as backlog or lost, depending on the scenario.</span></li>
+            <li><span><b>Book profit.</b> Sales revenue minus procurement, holding on hand and in transit, factory operating cost and the backlog penalty, summed over all nodes.</span></li>
+            <li><span><b>Observe.</b> The agent sees last period's demand and backlog, on-hand inventory, and the arrival schedule of its open orders.</span></li>
+          </ol>
+        </div>
+        <div class="panel" style="display:grid; gap:14px; align-content:start">
+          <dl class="spec">
+            <dt>Horizon</dt><dd>30 periods per episode</dd>
+            <dt>Action</dt><dd>Continuous order quantities, one per reorder link: 11 on the base network, 3 on the serial chain</dd>
+            <dt>Observation</dt><dd>71 values on the base network, 15 on the serial chain</dd>
+            <dt>Reward</dt><dd>System-wide profit for the period</dd>
+          </dl>
+          <div>
+            <div class="label" style="margin-bottom:6px">Demand model (retail link)</div>
+            <div class="formula">μ<sub>t</sub> = μ<sub>0</sub> · (1 + 0.05t) · (1 + 0.5 sin(2πt / 30)) · (2 if t ≥ 15) · g<sub>t</sub><br>D<sub>t</sub> ~ Poisson(μ<sub>t</sub>),&nbsp;&nbsp;μ<sub>0</sub> = 20</div>
+            <p class="caption" style="margin-top:8px">Trend, seasonality, the shock that doubles demand from period 15, and goodwill g<sub>t</sub> are each switched on per scenario. Goodwill falls 10% after a period with unmet demand and otherwise grows 1%, bounded to [0.2, 2]. The M5 scenarios replay Walmart item <span class="mono">FOODS_3_382</span> at store <span class="mono">CA_3</span> (days d_1841 to d_1870), scaled to mean 20, without added noise.</p>
+          </div>
+        </div>
+      </div>
+      <div class="section-head" style="margin-top:14px">
+        <h3>Topology library</h3>
+        <p>The two networks the benchmark uses, plus four YAML networks that ship in <code>gym_invmgmt/topologies/</code>. Any directed acyclic network can be described the same way.</p>
+        <div class="topo-key">
+          <span><svg viewBox="0 0 18 14"><rect x="1" y="1" width="16" height="12" rx="3" fill="var(--bg)" stroke="var(--muted)" stroke-dasharray="2.5 2"/></svg>raw material</span>
+          <span><svg viewBox="0 0 18 14"><rect x="1" y="1" width="16" height="12" rx="3" fill="var(--surface)" stroke="var(--ink-2)"/></svg>stocking node</span>
+          <span><svg viewBox="0 0 18 14"><circle cx="9" cy="7" r="5" fill="var(--ink-2)"/></svg>market</span>
+        </div>
+      </div>
+      <div class="topos" id="topos"></div>
     </section>
 
     <!-- ── Get started ── -->
@@ -466,6 +637,12 @@ obs, info = env.reset(seed=0)
 for t in range(30):
     action = env.action_space.sample()  # your policy here
     obs, reward, terminated, truncated, info = env.step(action)</code></pre>
+          <h3 style="margin-top:10px">Bring your own network</h3>
+          <p>Load any topology from YAML. The package ships the four shown above.</p>
+<pre><code>import os, gym_invmgmt
+
+path = os.path.join(os.path.dirname(gym_invmgmt.__file__), "topologies", "diamond.yaml")
+env = gym_invmgmt.make_custom_env(path, num_periods=30)</code></pre>
         </div>
         <div class="step">
           <h3>Reproduce the paper</h3>
@@ -478,6 +655,8 @@ bash download_weights.sh
 cd benchmarks
 python3 run_benchmarks.py --agent ALL --seeds 10
 python3 verify_publication_ready.py --quick</code></pre>
+          <h3 style="margin-top:10px">Use real demand data</h3>
+          <p>Adapters in <code>gym_invmgmt.data_adapters</code> turn M5-style wide sales files, long-format demand CSVs and node/edge tables into environment inputs. The test suite checks them on M5, Rossmann-style and Favorita-style data.</p>
           <h3 style="margin-top:10px">Evaluate your own method <span class="planned">guide planned</span></h3>
           <p>Add an agent with a <code>get_action(obs, t)</code> method to <code>agents/</code>, register it in <code>benchmarks/run_benchmarks.py</code>, and run it across all 26 scenarios with <code>--agent YourAgent</code>.</p>
         </div>
@@ -509,7 +688,7 @@ python3 verify_publication_ready.py --quick</code></pre>
 <footer>
   <div class="wrap">
     <span>gym-invmgmt · MIT license · Reza Barati and Qinmin Vivian Hu</span>
-    <span>Page data generated from the repository's result artifacts.</span>
+    <span>Every number on this page is computed from the repository's result artifacts.</span>
   </div>
 </footer>
 
@@ -521,10 +700,27 @@ python3 verify_publication_ready.py --quick</code></pre>
   const $ = (s) => document.querySelector(s);
   const fmt0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
   const fmt1 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  const pctf = (v) => fmt1.format(v * 100) + "%";
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const lerp = (a, b, f) => a + (b - a) * f;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
+  const onTheme = (fn) => {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", fn);
+    new MutationObserver(fn).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  };
+  const niceStep = (span, n) => { const raw = Math.max(span, 1e-9) / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; };
+  const load = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+
+  // ── Scenario naming ─────────────────────────────────────
+  const DEMAND = { "trend+seasonal": "trend + seasonal", "trend+seasonal+shock": "trend + seasonal + shock", stationary: "stationary", M5_volatile: "Walmart M5 trace" };
+  function parseKey(k) {
+    const [block, network, demand, gw, bl, marl] = k.split("|");
+    return { key: k, block, network, demand, goodwill: gw === "GW:True", backlog: bl === "BL:True", marl: marl === "MARL:True" };
+  }
+  const scnLong = (s) => `${s.network === "base" ? "Base network" : "Serial chain"} · ${DEMAND[s.demand] || s.demand} demand${s.goodwill ? " · goodwill" : ""} · ${s.backlog ? "backorders" : "lost sales"}`;
+  const scnShort = (s) => `${s.network} · ${DEMAND[s.demand] || s.demand}${s.goodwill ? " · goodwill" : ""} · ${s.backlog ? "backorders" : "lost sales"}${s.marl ? " · multi-agent" : ""}`;
 
   // ── Shared tooltip ──────────────────────────────────────
   const tip = $("#tip");
@@ -537,6 +733,14 @@ python3 verify_publication_ready.py --quick</code></pre>
     tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
   }
   const hideTip = () => { tip.hidden = true; };
+  // Elements carrying data-tip="title|value" share one hover handler.
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    const [a, b] = t.dataset.tip.split("|");
+    showTip(`<span class="t">${esc(a)}</span><b>${esc(b)}</b>`, e.clientX, e.clientY);
+    t.addEventListener("pointerleave", hideTip, { once: true });
+  });
 
   // ── Copy BibTeX ─────────────────────────────────────────
   $("#copy").addEventListener("click", () => {
@@ -549,36 +753,28 @@ python3 verify_publication_ready.py --quick</code></pre>
   // ════════════════════════════════════════════════════════
   // Simulation player
   // ════════════════════════════════════════════════════════
-  function initPlayer(data) {
-    const meta = data.meta, runs = data.runs, T = meta.periods;
-    const svg = $("#net");
-    const W = 1000, H = 420, NW = 112, NH = 62;
-    const COLS = [
-      ["raw_materials", 70, "Raw material"],
-      ["manufacturer", 300, "Factories"],
-      ["distributor", 560, "Distributors"],
-      ["retailer", 790, "Retailer"],
-    ];
-    const MARKET_X = 946, MID = 220;
-    const pos = {};
-    const kindOf = {};
-    COLS.forEach(([lvl, x]) => {
-      const ids = meta.levels[lvl] || [];
-      const gap = ids.length >= 3 ? 125 : 150;
-      ids.forEach((id, i) => { pos[id] = { x, y: MID + (i - (ids.length - 1) / 2) * gap }; kindOf[id] = lvl; });
-    });
-    pos[0] = { x: MARKET_X, y: MID }; kindOf[0] = "market";
-    const names = { raw_materials: "Raw", manufacturer: "Factory", distributor: "Distrib.", retailer: "Retailer", market: "Market" };
-    const halfW = (id) => (id === 0 ? 40 : NW / 2);
+  function initPlayer(index) {
+    const svg = $("#net"), cache = new Map();
+    const NW = 112, NH = 62, MID = 220, MARKET_X = 946;
+    const COLS = [["raw_materials", 70, "Raw material"], ["manufacturer", 300, "Factories"], ["distributor", 560, "Distributors"], ["retailer", 790, "Retailer"]];
+    const NAMES = { raw_materials: "Raw", manufacturer: "Factory", distributor: "Distrib.", retailer: "Retailer" };
+    let data = null, meta = null, runs = null, T = 30;
+    let pos = {}, kindOf = {}, paths = {}, nodeEls = {}, xMax = {}, uMax = 1, netIdx = {}, mainNodes = [], gDots = null;
+    let cur = 0, tau = 0, playing = !reduceMotion.matches, speed = 1, last = null, hold = 0, inView = true;
+    if (reduceMotion.matches) tau = 14;
 
-    // Per-node gauge scale: the largest on-hand level any shown policy reaches there.
-    const xMax = {};
-    meta.nodes.forEach((n) => {
-      const j = meta.node_index[n];
-      xMax[n] = Math.max(1, ...runs.flatMap((r) => r.X.map((row) => row[j])));
+    // Scenario picker, grouped by benchmark block.
+    const sel = $("#scn-select");
+    [["A_Core", "Core grid"], ["B_PaperReplication", "Stationary replication"], ["D_WalmartM5", "Walmart M5"]].forEach(([b, label]) => {
+      const og = document.createElement("optgroup"); og.label = label;
+      index.scenarios.filter((s) => s.key.startsWith(b + "|")).forEach((s) => {
+        const o = document.createElement("option"); o.value = s.file; o.textContent = scnShort(parseKey(s.key));
+        if (s.key === index.default) o.selected = true;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
     });
-    const uMax = Math.max(1, ...runs.flatMap((r) => r.U.map((row) => row[0])));
-    const netIdx = {}; meta.network_links.forEach(([a, b], i) => (netIdx[a + "-" + b] = i));
+    sel.addEventListener("change", () => openScenario(sel.value, true));
 
     const el = (tag, attrs, parent) => {
       const e = document.createElementNS(SVGNS, tag);
@@ -586,85 +782,96 @@ python3 verify_publication_ready.py --quick</code></pre>
       if (parent) parent.appendChild(e);
       return e;
     };
-    svg.innerHTML = "";
-    COLS.forEach(([, x, label]) => { const t = el("text", { x, y: 24, "text-anchor": "middle", class: "col-label" }, svg); t.textContent = label; });
-    const tMarket = el("text", { x: MARKET_X, y: 24, "text-anchor": "middle", class: "col-label" }, svg); tMarket.textContent = "Customers";
+    const halfW = (id) => (id === 0 ? 40 : NW / 2);
 
-    const gEdges = el("g", {}, svg);
-    const gLabels = el("g", {}, svg);
-    const gDots = el("g", {}, svg);
-    const gNodes = el("g", {}, svg);
+    function build() {
+      meta = data.meta; runs = data.runs; T = meta.periods;
+      $("#sim-scn").textContent = scnLong(parseKey(meta.scenario));
+      $("#sim-eyebrow").textContent = `Benchmark episode · seed ${meta.seed}`;
+      const unmet = meta.backlog ? "backlog" : "lost sales";
+      $("#lg-unmet").textContent = unmet; $("#lg-unmet2").textContent = unmet;
+      $("#k-back-label").textContent = meta.backlog ? "Customer backlog" : "Lost sales, this period";
 
-    const paths = {};
-    function edgePath(a, b) {
-      const x1 = pos[a].x + halfW(a), y1 = pos[a].y, x2 = pos[b].x - halfW(b), y2 = pos[b].y, dx = x2 - x1;
-      return { d: `M${x1},${y1} C${x1 + dx * 0.5},${y1} ${x2 - dx * 0.5},${y2} ${x2},${y2}`, x1, y1, x2, y2 };
+      pos = {}; kindOf = {}; paths = {}; nodeEls = {}; xMax = {}; netIdx = {};
+      COLS.forEach(([lvl, x]) => {
+        const ids = meta.levels[lvl] || [], gap = ids.length >= 3 ? 125 : 150;
+        ids.forEach((id, i) => { pos[id] = { x, y: MID + (i - (ids.length - 1) / 2) * gap }; kindOf[id] = lvl; });
+      });
+      pos[0] = { x: MARKET_X, y: MID }; kindOf[0] = "market";
+      meta.nodes.forEach((n) => { const j = meta.node_index[n]; xMax[n] = Math.max(1, ...runs.flatMap((r) => r.X.map((row) => row[j]))); });
+      uMax = Math.max(1, ...runs.flatMap((r) => r.U.map((row) => row[0])));
+      meta.network_links.forEach(([a, b], i) => (netIdx[a + "-" + b] = i));
+      mainNodes = meta.nodes.filter((n) => kindOf[n] !== "raw_materials" && n !== 0);
+
+      svg.innerHTML = "";
+      // Fit the drawing to the network's height so a single chain does not float in empty space.
+      const ys = Object.values(pos).map((q) => q.y), top = Math.min(...ys) - NH / 2 - 44, bottom = Math.max(...ys) + NH / 2 + 14;
+      svg.setAttribute("viewBox", `0 ${top} 1000 ${bottom - top}`);
+      COLS.forEach(([lvl, x, label]) => { if ((meta.levels[lvl] || []).length) el("text", { x, y: top + 20, "text-anchor": "middle", class: "col-label" }, svg).textContent = label; });
+      el("text", { x: MARKET_X, y: top + 20, "text-anchor": "middle", class: "col-label" }, svg).textContent = "Customers";
+      const gEdges = el("g", {}, svg);
+      gDots = el("g", {}, svg);
+      const gLabels = el("g", {}, svg), gNodes = el("g", {}, svg);
+      meta.network_links.forEach(([a, b]) => {
+        const x1 = pos[a].x + halfW(a), y1 = pos[a].y, x2 = pos[b].x - halfW(b), y2 = pos[b].y, dx = x2 - x1;
+        const p = el("path", { d: `M${x1},${y1} C${x1 + dx * 0.5},${y1} ${x2 - dx * 0.5},${y2} ${x2},${y2}`, class: "edge" + (b === 0 ? " retail" : "") }, gEdges);
+        paths[a + "-" + b] = { el: p, len: p.getTotalLength(), y1, y2 };
+      });
+      meta.reorder_links.forEach(([a, b]) => {
+        const key = a + "-" + b, P = paths[key];
+        const f = P.y2 > P.y1 ? 0.35 : P.y2 < P.y1 ? 0.65 : 0.5;
+        const pt = P.el.getPointAtLength(P.len * f);
+        const g = el("g", { class: "lt" }, gLabels);
+        el("rect", { x: pt.x - 15, y: pt.y - 8, width: 30, height: 16, rx: 3 }, g);
+        el("text", { x: pt.x, y: pt.y + 3.5, "text-anchor": "middle" }, g).textContent = "L " + meta.lead_times[key];
+      });
+      meta.nodes.forEach((n) => {
+        const k = kindOf[n], { x, y } = pos[n], w = halfW(n) * 2;
+        const g = el("g", { class: "node" + (k === "raw_materials" ? " raw" : "") }, gNodes);
+        el("rect", { class: "box", x: x - w / 2, y: y - NH / 2, width: w, height: NH, rx: 5 }, g);
+        el("text", { class: "name", x: x - w / 2 + 9, y: y - NH / 2 + 16 }, g).textContent = n === 0 ? "Market" : `${NAMES[k]} ${n}`;
+        const val = el("text", { class: "val", x: x - w / 2 + 9, y: y + 6 }, g);
+        const unit = el("text", { class: "unit", x: x + w / 2 - 9, y: y + 6, "text-anchor": "end" }, g);
+        let fill = null;
+        if (k === "raw_materials") { val.textContent = "∞"; unit.textContent = "supply"; }
+        else {
+          const isM = n === 0;
+          unit.textContent = isM ? "demand" : "on hand";
+          el("rect", { class: isM ? "btrack" : "track", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: w - 18, height: 6, rx: 2 }, g);
+          fill = el("rect", { class: isM ? "bfill" : "fill", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: 0, height: 6, rx: 2 }, g);
+        }
+        nodeEls[n] = { val, fill, w: w - 18 };
+      });
+
+      const box = $("#agents"); box.innerHTML = "";
+      if (cur >= runs.length) cur = 0;
+      runs.forEach((r, i) => {
+        const b = document.createElement("button");
+        b.className = "agent-btn"; b.type = "button"; b.setAttribute("aria-pressed", i === cur ? "true" : "false");
+        b.innerHTML = `<span class="sw"></span>${esc(r.agent)} <span class="v">${fmt0.format(r.kpis.profit)}</span>`;
+        b.addEventListener("click", () => select(i));
+        box.appendChild(b);
+      });
+      drawCharts(); render();
     }
-    meta.network_links.forEach(([a, b]) => {
-      const g = edgePath(a, b);
-      const p = el("path", { d: g.d, class: "edge" + (b === 0 ? " retail" : "") }, gEdges);
-      paths[a + "-" + b] = { el: p, len: p.getTotalLength(), ...g };
-    });
-    meta.reorder_links.forEach(([a, b]) => {
-      const key = a + "-" + b, L = meta.lead_times[key], P = paths[key];
-      const s = P.y2 > P.y1 ? 0.35 : P.y2 < P.y1 ? 0.65 : 0.5;
-      const pt = P.el.getPointAtLength(P.len * s);
-      const g = el("g", { class: "lt" }, gLabels);
-      el("rect", { x: pt.x - 15, y: pt.y - 8, width: 30, height: 16, rx: 3 }, g);
-      const t = el("text", { x: pt.x, y: pt.y + 3.5, "text-anchor": "middle" }, g);
-      t.textContent = "L " + L;
-    });
-
-    const nodeEls = {};
-    meta.nodes.forEach((n) => {
-      const k = kindOf[n], { x, y } = pos[n], w = halfW(n) * 2;
-      const g = el("g", { class: "node" + (k === "raw_materials" ? " raw" : "") }, gNodes);
-      el("rect", { class: "box", x: x - w / 2, y: y - NH / 2, width: w, height: NH, rx: 5 }, g);
-      const nm = el("text", { class: "name", x: x - w / 2 + 9, y: y - NH / 2 + 16 }, g);
-      nm.textContent = n === 0 ? "Market" : `${names[k]} ${n}`;
-      const val = el("text", { class: "val", x: x - w / 2 + 9, y: y + 6 }, g);
-      const unit = el("text", { class: "unit", x: x + w / 2 - 9, y: y + 6, "text-anchor": "end" }, g);
-      let fill = null;
-      if (k === "raw_materials") { val.textContent = "∞"; unit.textContent = "supply"; }
-      else if (n === 0) {
-        unit.textContent = "demand";
-        el("rect", { class: "btrack", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: w - 18, height: 6, rx: 2 }, g);
-        fill = el("rect", { class: "bfill", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: 0, height: 6, rx: 2 }, g);
-      } else {
-        unit.textContent = "on hand";
-        el("rect", { class: "track", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: w - 18, height: 6, rx: 2 }, g);
-        fill = el("rect", { class: "fill", x: x - w / 2 + 9, y: y + NH / 2 - 15, width: 0, height: 6, rx: 2 }, g);
-      }
-      nodeEls[n] = { val, fill, w: w - 18 };
-    });
-    const mainNodes = meta.nodes.filter((n) => kindOf[n] !== "raw_materials" && n !== 0);
-
-    // ── State ──
-    let cur = 0, tau = 0, playing = !reduceMotion.matches, speed = 1, last = null, hold = 0, inView = true;
-    if (reduceMotion.matches) tau = 14;
-
-    // ── Agent buttons double as the legend ──
-    const agentsBox = $("#agents");
-    runs.forEach((r, i) => {
-      const b = document.createElement("button");
-      b.className = "agent-btn"; b.type = "button"; b.setAttribute("aria-pressed", i === cur ? "true" : "false");
-      b.innerHTML = `<span class="sw"></span>${esc(r.agent)} <span class="v">${fmt0.format(r.kpis.profit)}</span>`;
-      b.addEventListener("click", () => { cur = i; agentsBox.querySelectorAll("button").forEach((x, j) => x.setAttribute("aria-pressed", j === i ? "true" : "false")); drawCharts(); render(); });
-      agentsBox.appendChild(b);
-    });
-
-    function frameState(t) {
-      const k = Math.min(Math.floor(t), T - 1), f = Math.min(1, t - k);
-      return { k, f };
+    function select(i) {
+      cur = i;
+      $("#agents").querySelectorAll("button").forEach((x, j) => x.setAttribute("aria-pressed", j === i ? "true" : "false"));
+      drawCharts(); render();
+    }
+    function openScenario(file, restart) {
+      const go = (d) => { data = d; if (restart) tau = 0; build(); };
+      if (cache.has(file)) { go(cache.get(file)); return Promise.resolve(); }
+      return load("data/rollouts/" + file).then((d) => { cache.set(file, d); go(d); });
     }
 
+    const frameState = (t) => { const k = Math.min(Math.floor(t), T - 1); return { k, f: Math.min(1, t - k) }; };
     function render() {
+      if (!data) return;
       const run = runs[cur], { k, f } = frameState(tau);
-      // Inventory gauges
       let onHand = 0;
       mainNodes.forEach((n) => {
-        const j = meta.node_index[n];
-        const v = lerp(run.X[k][j], run.X[Math.min(k + 1, T)][j], f);
+        const j = meta.node_index[n], v = lerp(run.X[k][j], run.X[Math.min(k + 1, T)][j], f);
         onHand += v;
         nodeEls[n].val.textContent = fmt0.format(v);
         nodeEls[n].fill.setAttribute("width", Math.max(0, (v / xMax[n]) * nodeEls[n].w));
@@ -672,9 +879,7 @@ python3 verify_publication_ready.py --quick</code></pre>
       const dem = run.D[k][0], back = run.U[k][0];
       nodeEls[0].val.textContent = fmt0.format(dem);
       nodeEls[0].fill.setAttribute("width", Math.max(0, (back / uMax) * nodeEls[0].w));
-
-      // Shipments in transit: an order placed at period s on a link with lead time L
-      // sits at fraction (tau - s) / L along that link until it arrives at s + L.
+      // An order placed at period s on a link with lead time L sits at fraction (tau - s) / L along it.
       let html = "";
       meta.reorder_links.forEach(([a, b], i) => {
         const key = a + "-" + b, L = meta.lead_times[key], P = paths[key];
@@ -683,8 +888,7 @@ python3 verify_publication_ready.py --quick</code></pre>
           const q = run.R[s][i]; if (q < 0.5) continue;
           const p = (tau - s) / L; if (p < 0 || p >= 1) continue;
           const pt = P.el.getPointAtLength(P.len * p);
-          const r = Math.min(9, 2 + Math.sqrt(q) * 0.42);
-          html += `<circle class="dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${r.toFixed(1)}"/>`;
+          html += `<circle class="dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${Math.min(9, 2 + Math.sqrt(q) * 0.42).toFixed(1)}"/>`;
         }
       });
       const sales = run.S[k][netIdx["1-0"]];
@@ -693,89 +897,73 @@ python3 verify_publication_ready.py --quick</code></pre>
         html += `<circle class="dot" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${Math.min(9, 2 + Math.sqrt(sales) * 0.42).toFixed(1)}"/>`;
       }
       gDots.innerHTML = html;
-
-      // KPIs
       const cum = [0, ...run.P];
-      const profit = lerp(cum[k], cum[k + 1], f);
       $("#k-period").innerHTML = `${Math.min(T, k + 1)}<small>of ${T}</small>`;
-      $("#k-profit").textContent = fmt0.format(profit);
+      $("#k-profit").textContent = fmt0.format(lerp(cum[k], cum[k + 1], f));
       $("#k-backlog").innerHTML = `${fmt0.format(back)}<small>units</small>`;
       $("#k-inv").innerHTML = `${fmt0.format(onHand)}<small>units</small>`;
       $("#scrub").value = tau;
       updateCharts();
     }
 
-    // ── Charts ──
-    const chP = $("#ch-profit"), chD = $("#ch-demand");
-    const M = { l: 44, r: 12, t: 10, b: 26 };
+    // ── Player charts ──
+    const chP = $("#ch-profit"), chD = $("#ch-demand"), M = { l: 46, r: 12, t: 10, b: 26 };
     let refs = {};
-    function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p) * p; }
-    function axes(svgEl, w, h, yMax, yTicks, fmt) {
+    function axes(w, h, yMin, yMax) {
+      const step = niceStep(yMax - yMin, 3), Y = (v) => M.t + (h - M.t - M.b) * (1 - (v - yMin) / (yMax - yMin));
       let s = `<g class="grid">`;
-      yTicks.forEach((v) => { const y = M.t + (h - M.t - M.b) * (1 - v / yMax); s += `<line x1="${M.l}" x2="${w - M.r}" y1="${y}" y2="${y}"/><text x="${M.l - 6}" y="${y + 3.5}" text-anchor="end">${fmt(v)}</text>`; });
+      for (let v = Math.ceil(yMin / step) * step; v <= yMax + 1e-9; v += step) s += `<line x1="${M.l}" x2="${w - M.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${M.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${fmt0.format(v)}</text>`;
       s += `</g>`;
-      [0, 10, 20, 30].forEach((t) => { const x = M.l + (w - M.l - M.r) * (t / T); s += `<text x="${x}" y="${h - 8}" text-anchor="middle">${t}</text>`; });
-      s += `<line class="axis" x1="${M.l}" x2="${w - M.r}" y1="${h - M.b}" y2="${h - M.b}"/>`;
-      return s;
+      [0, 10, 20, 30].forEach((t) => { s += `<text x="${M.l + (w - M.l - M.r) * (t / T)}" y="${h - 8}" text-anchor="middle">${t}</text>`; });
+      s += `<line class="axis" x1="${M.l}" x2="${w - M.r}" y1="${Y(Math.max(0, yMin))}" y2="${Y(Math.max(0, yMin))}"/>`;
+      return { s, Y };
     }
     function drawCharts() {
       const run = runs[cur];
       $("#lg-agent").textContent = run.agent;
-      // Profit race
       {
         const w = chP.clientWidth || 480, h = 200; chP.setAttribute("viewBox", `0 0 ${w} ${h}`);
-        const all = runs.flatMap((r) => r.P);
-        const yMax = niceMax(Math.max(...all)), yMin = 0;
-        const X = (t) => M.l + (w - M.l - M.r) * (t / T), Y = (v) => M.t + (h - M.t - M.b) * (1 - (Math.max(yMin, v) - yMin) / (yMax - yMin));
-        const ticks = [0, yMax / 2, yMax];
-        let s = axes(chP, w, h, yMax, ticks, (v) => fmt0.format(v));
-        s += `<defs><clipPath id="clipP"><rect id="clipPr" x="0" y="0" width="0" height="${h}"/></clipPath></defs>`;
+        const all = runs.flatMap((r) => r.P), step = niceStep(Math.max(...all) - Math.min(0, ...all), 3);
+        const yMax = Math.ceil(Math.max(...all) / step) * step, yMin = Math.floor(Math.min(0, ...all) / step) * step;
+        const X = (t) => M.l + (w - M.l - M.r) * (t / T), ax = axes(w, h, yMin, yMax), Y = ax.Y;
+        let s = ax.s + `<defs><clipPath id="clipP"><rect id="clipPr" x="0" y="0" width="0" height="${h}"/></clipPath></defs>`;
         const line = (r) => "M" + [0, ...r.P].map((v, t) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join("L");
         runs.forEach((r, i) => { if (i !== cur) s += `<path d="${line(r)}" fill="none" stroke="var(--other-line)" stroke-width="1.5" opacity="0.35"/>`; });
-        s += `<path d="${line(run)}" fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.25"/>`;
-        s += `<g clip-path="url(#clipP)">`;
+        s += `<path d="${line(run)}" fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.25"/><g clip-path="url(#clipP)">`;
         runs.forEach((r, i) => { if (i !== cur) s += `<path d="${line(r)}" fill="none" stroke="var(--other-line)" stroke-width="1.5"/>`; });
         s += `<path d="${line(run)}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>`;
-        s += `<line id="phP" y1="${M.t}" y2="${h - M.b}" stroke="var(--accent)" stroke-width="1"/>`;
-        s += `<circle id="dotP" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
-        s += `<text id="lblP" font-size="11" style="fill:var(--ink);font-family:var(--f-mono)"></text>`;
-        s += `<rect class="hit" x="${M.l}" y="0" width="${w - M.l - M.r}" height="${h}" fill="transparent" style="cursor:pointer"/>`;
-        chP.innerHTML = s;
-        refs.P = { X, Y, w, h };
+        s += `<line id="phP" y1="${M.t}" y2="${h - M.b}" stroke="var(--accent)" stroke-width="1"/><circle id="dotP" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+        s += `<text id="lblP" style="fill:var(--ink);font-family:var(--f-mono)"></text><rect class="hit" x="${M.l}" y="0" width="${w - M.l - M.r}" height="${h}" fill="transparent" style="cursor:pointer"/>`;
+        chP.innerHTML = s; refs.P = { X, Y, w, h };
       }
-      // Demand + backlog
       {
         const w = chD.clientWidth || 480, h = 200; chD.setAttribute("viewBox", `0 0 ${w} ${h}`);
-        const yMax = niceMax(Math.max(...run.D.map((d) => d[0]), ...runs.flatMap((r) => r.U.map((u) => u[0]))));
-        const X = (t) => M.l + (w - M.l - M.r) * (t / T), Y = (v) => M.t + (h - M.t - M.b) * (1 - v / yMax);
-        let s = axes(chD, w, h, yMax, [0, yMax / 2, yMax], (v) => fmt0.format(v));
+        const peak = Math.max(1, ...run.D.map((d) => d[0]), ...run.U.map((u) => u[0]));
+        const step = niceStep(peak, 3), yMax = Math.ceil(peak / step) * step;
+        const X = (t) => M.l + (w - M.l - M.r) * (t / T), ax = axes(w, h, 0, yMax), Y = ax.Y;
         const bw = Math.min(24, (w - M.l - M.r) / T - 2);
-        s += `<g id="bars">`;
-        run.D.forEach((d, t) => { const x = X(t + 0.5) - bw / 2, y = Y(d[0]); s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${(h - M.b - y).toFixed(1)}" rx="1.5" fill="var(--other-line)" data-t="${t}"/>`; });
+        let s = ax.s + `<g id="bars">`;
+        run.D.forEach((d, t) => { const x = X(t + 0.5) - bw / 2, y = Y(d[0]); s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, h - M.b - y).toFixed(1)}" rx="1.5" fill="var(--other-line)" data-t="${t}"/>`; });
         s += `</g>`;
         const pts = run.U.map((u, t) => `${X(t + 1).toFixed(1)},${Y(u[0]).toFixed(1)}`);
         const area = `M${X(1)},${Y(0)}L` + pts.join("L") + `L${X(T)},${Y(0)}Z`;
         s += `<defs><clipPath id="clipD"><rect id="clipDr" x="0" y="0" width="0" height="${h}"/></clipPath></defs>`;
         s += `<path d="M${pts.join("L")}" fill="none" stroke="var(--critical)" stroke-width="1.5" opacity="0.3"/>`;
         s += `<g clip-path="url(#clipD)"><path d="${area}" fill="var(--critical-wash)"/><path d="M${pts.join("L")}" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linejoin="round"/></g>`;
-        s += `<line id="phD" y1="${M.t}" y2="${h - M.b}" stroke="var(--accent)" stroke-width="1"/>`;
-        s += `<rect class="hit" x="${M.l}" y="0" width="${w - M.l - M.r}" height="${h}" fill="transparent" style="cursor:pointer"/>`;
-        chD.innerHTML = s;
-        refs.D = { X, Y, w, h };
+        s += `<line id="phD" y1="${M.t}" y2="${h - M.b}" stroke="var(--accent)" stroke-width="1"/><rect class="hit" x="${M.l}" y="0" width="${w - M.l - M.r}" height="${h}" fill="transparent" style="cursor:pointer"/>`;
+        chD.innerHTML = s; refs.D = { X, Y, w, h };
       }
       updateCharts();
     }
     function updateCharts() {
       if (!refs.P) return;
-      const run = runs[cur], { k, f } = frameState(tau);
-      const xP = refs.P.X(tau);
+      const run = runs[cur], { k, f } = frameState(tau), xP = refs.P.X(tau);
       chP.querySelector("#clipPr").setAttribute("width", xP);
       chP.querySelector("#phP").setAttribute("x1", xP); chP.querySelector("#phP").setAttribute("x2", xP);
       const cum = [0, ...run.P], v = lerp(cum[k], cum[k + 1], f), yP = refs.P.Y(v);
       const d = chP.querySelector("#dotP"); d.setAttribute("cx", xP); d.setAttribute("cy", yP);
-      const lb = chP.querySelector("#lblP"); lb.textContent = fmt0.format(v);
-      const right = xP > refs.P.w - 70;
-      lb.setAttribute("x", right ? xP - 8 : xP + 8); lb.setAttribute("y", yP - 8); lb.setAttribute("text-anchor", right ? "end" : "start");
+      const lb = chP.querySelector("#lblP"), right = xP > refs.P.w - 70;
+      lb.textContent = fmt0.format(v); lb.setAttribute("x", right ? xP - 8 : xP + 8); lb.setAttribute("y", yP - 8); lb.setAttribute("text-anchor", right ? "end" : "start");
       const xD = refs.D.X(tau);
       chD.querySelector("#clipDr").setAttribute("width", xD);
       chD.querySelector("#phD").setAttribute("x1", xD); chD.querySelector("#phD").setAttribute("x2", xD);
@@ -783,27 +971,20 @@ python3 verify_publication_ready.py --quick</code></pre>
     }
     function chartHover(svgEl, which) {
       const periodAt = (e) => {
-        const r = svgEl.getBoundingClientRect(), ref = refs[which];
-        const x = (e.clientX - r.left) * (ref.w / r.width);
+        const r = svgEl.getBoundingClientRect(), ref = refs[which], x = (e.clientX - r.left) * (ref.w / r.width);
         return Math.max(0, Math.min(T - 1, Math.floor(((x - M.l) / (ref.w - M.l - M.r)) * T)));
       };
       svgEl.addEventListener("pointermove", (e) => {
         if (!e.target.classList.contains("hit")) return hideTip();
         const t = periodAt(e);
-        if (which === "P") {
-          const rows = runs.map((r) => `${esc(r.agent)}: <b>${fmt0.format(r.P[t])}</b>`).join("<br>");
-          showTip(`<span class="t">end of period ${t + 1}</span>${rows}`, e.clientX, e.clientY);
-        } else {
-          const r = runs[cur];
-          showTip(`<span class="t">period ${t + 1}</span>Demand: <b>${fmt0.format(r.D[t][0])}</b><br>Backlog (${esc(r.agent)}): <b>${fmt0.format(r.U[t][0])}</b>`, e.clientX, e.clientY);
-        }
+        if (which === "P") showTip(`<span class="t">end of period ${t + 1}</span>` + runs.map((r) => `${esc(r.agent)}: <b>${fmt0.format(r.P[t])}</b>`).join("<br>"), e.clientX, e.clientY);
+        else { const r = runs[cur]; showTip(`<span class="t">period ${t + 1}</span>Demand: <b>${fmt0.format(r.D[t][0])}</b><br>${meta.backlog ? "Backlog" : "Lost sales"} (${esc(r.agent)}): <b>${fmt0.format(r.U[t][0])}</b>`, e.clientX, e.clientY); }
       });
       svgEl.addEventListener("pointerleave", hideTip);
       svgEl.addEventListener("click", (e) => { if (!e.target.classList.contains("hit")) return; tau = periodAt(e) + 1; setPlaying(false); render(); });
     }
     chartHover(chP, "P"); chartHover(chD, "D");
 
-    // ── Transport ──
     const playBtn = $("#play");
     function setPlaying(p) {
       playing = p; last = null;
@@ -817,48 +998,68 @@ python3 verify_publication_ready.py --quick</code></pre>
       speed = +b.dataset.s; document.querySelectorAll(".speed button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
     }));
     $("#sim").addEventListener("keydown", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (["INPUT", "SELECT"].includes(e.target.tagName)) return;
       if (e.code === "Space") { e.preventDefault(); playBtn.click(); }
       if (e.code === "ArrowRight") { tau = Math.min(T, Math.floor(tau) + 1); setPlaying(false); render(); }
       if (e.code === "ArrowLeft") { tau = Math.max(0, Math.ceil(tau) - 1); setPlaying(false); render(); }
     });
     $("#sim").tabIndex = -1;
-
-    const PERIODS_PER_SEC = 1.7;
     function tick(now) {
       if (!playing) return;
-      if (last !== null && inView && !document.hidden) {
+      if (last !== null && inView && !document.hidden && data) {
         const dt = Math.min(0.1, (now - last) / 1000);
         if (tau >= T) { hold += dt; if (hold > 1.6) { tau = 0; hold = 0; } }
-        else tau = Math.min(T, tau + dt * PERIODS_PER_SEC * speed);
+        else tau = Math.min(T, tau + dt * 1.7 * speed);
         render();
       }
       last = now;
       requestAnimationFrame(tick);
     }
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0.15 }).observe($("#sim"));
-    }
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0.15 }).observe($("#sim"));
     reduceMotion.addEventListener?.("change", () => { if (reduceMotion.matches) setPlaying(false); });
-    let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(drawCharts, 60); }).observe($("#sim .charts"));
+    let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => data && drawCharts(), 60); }).observe($("#sim .charts"));
 
-    drawCharts(); render(); setPlaying(playing);
-    // Hook for docs/scripts/record_teaser.mjs, which renders the teaser video frame by frame.
-    window.gimPlayer = {
-      seek(t) { setPlaying(false); tau = Math.max(0, Math.min(T, t)); render(); },
-      select(i) { agentsBox.querySelectorAll("button")[i]?.click(); },
-      periods: T,
-    };
+    const first = index.scenarios.find((s) => s.key === index.default) || index.scenarios[0];
+    return openScenario(first.file, false).then(() => {
+      setPlaying(playing);
+      // Hook for docs/scripts/record_teaser.mjs, which renders the teaser video frame by frame.
+      window.gimPlayer = { seek(t) { setPlaying(false); tau = Math.max(0, Math.min(T, t)); render(); }, select, periods: T };
+    });
   }
 
   // ════════════════════════════════════════════════════════
-  // Leaderboard
+  // Statistics
   // ════════════════════════════════════════════════════════
-  function initBoard(data) {
-    const S = data.scenarios, A = data.agents;
+  function mulberry32(a) { return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function iqm(values) {
+    const v = values.slice().sort((a, b) => a - b), lo = Math.floor(v.length / 4);
+    return mean(v.slice(lo, v.length - lo));
+  }
+  // groups: one array of per-seed values per scenario. Both aggregates weight scenarios equally.
+  const aggregate = (groups, kind) => (kind === "iqm" ? iqm(groups.flat()) : mean(groups.map(mean)));
+  // Stratified bootstrap: resample seeds within each scenario, keep the scenario set fixed.
+  function bootstrap(groups, kind, B) {
+    const rnd = mulberry32(20260508), out = new Float64Array(B);
+    for (let b = 0; b < B; b++) {
+      const res = groups.map((g) => { const r = new Array(g.length); for (let i = 0; i < g.length; i++) r[i] = g[(rnd() * g.length) | 0]; return r; });
+      out[b] = aggregate(res, kind);
+    }
+    out.sort();
+    return [out[Math.floor(0.025 * (B - 1))], out[Math.ceil(0.975 * (B - 1))]];
+  }
+  function kendall(a, b) {
+    let c = 0, d = 0;
+    for (let i = 0; i < a.length; i++) for (let j = i + 1; j < a.length; j++) { const s = Math.sign(a[i] - a[j]) * Math.sign(b[i] - b[j]); if (s > 0) c++; else if (s < 0) d++; }
+    return (c - d) / ((a.length * (a.length - 1)) / 2);
+  }
+
+  // ════════════════════════════════════════════════════════
+  // Results: leaderboard, robustness, profiles, frontier
+  // ════════════════════════════════════════════════════════
+  function initResults(data) {
+    const S = data.scenarios, A = data.agents, NS = data.seeds.length;
     const oracle = A.find((a) => a.id === "Oracle");
-    const FAM = { Oracle: "--fam-oracle", OR: "--fam-or", Heuristic: "--fam-heur", RL: "--fam-rl", Imitation: "--fam-il", LLM: "--fam-llm" };
-    const FAM_LABEL = { Oracle: "Oracle", OR: "Optimization", Heuristic: "Heuristic", RL: "Reinforcement learning", Imitation: "Imitation", LLM: "LLM" };
+    const FAM_LABEL = { Oracle: "Oracle", OR: "Optimization", Heuristic: "Heuristic", RL: "RL", Imitation: "Imitation", LLM: "LLM" };
     const ORDER = ["A_Core", "B_PaperReplication", "D_WalmartM5", "C_MARL"];
     const SCN = [
       ["main", "Main", (s) => s.block !== "C_MARL"],
@@ -870,135 +1071,377 @@ python3 verify_publication_ready.py --quick</code></pre>
     ];
     const NET = [["all", "Both"], ["base", "Base"], ["serial", "Serial"]];
     const METRIC = {
-      pct: { label: "% of Oracle", dir: -1, fmt: (v) => fmt1.format(v * 100) + "%" },
-      profit: { label: "Mean profit", dir: -1, fmt: (v) => fmt0.format(v) },
+      pct: { label: "% of Oracle", dir: -1, fmt: pctf, ci: true },
+      iqm: { label: "% of Oracle, IQM", dir: -1, fmt: pctf, ci: true },
+      profit: { label: "Mean profit", dir: -1, fmt: (v) => fmt0.format(v), ci: true },
       cvar5: { label: "CVaR 5%", dir: -1, fmt: (v) => fmt0.format(v) },
-      fill_rate: { label: "Fill rate", dir: -1, fmt: (v) => fmt1.format(v * 100) + "%" },
+      fill_rate: { label: "Fill rate", dir: -1, fmt: pctf },
       avg_inv: { label: "Avg inventory", dir: 1, fmt: (v) => fmt1.format(v) },
       time_sec: { label: "Sec / episode", dir: 1, fmt: (v) => (v < 1 ? v.toFixed(3) : fmt1.format(v)) },
     };
-    const state = { scn: "main", net: "all", metric: "pct", abl: false };
-    try { const saved = JSON.parse(localStorage.getItem("gim-board") || "{}"); Object.assign(state, saved); } catch (e) {}
+    const state = { scn: "main", net: "all", metric: "pct", abl: false, open: null };
+    try { const saved = JSON.parse(localStorage.getItem("gim-board") || "{}"); ["scn", "net", "metric", "abl"].forEach((k) => { if (k in saved) state[k] = saved[k]; }); } catch (e) {}
+    if (!METRIC[state.metric]) state.metric = "pct";
 
-    // Grid order: Core, Stationary, M5, then MARL.
     const order = S.map((s, i) => i).sort((a, b) => ORDER.indexOf(S[a].block) - ORDER.indexOf(S[b].block) || a - b);
-    const short = (s) => {
-      const d = { "trend+seasonal": "trend+seasonal", "trend+seasonal+shock": "trend+seasonal+shock", stationary: "stationary", M5_volatile: "M5 volatile" }[s.demand] || s.demand;
-      return `${s.network} · ${d}${s.goodwill ? " · goodwill" : ""} · ${s.backlog ? "backorders" : "lost sales"}${s.marl ? " · multi-agent" : ""}`;
+    // Per-episode % of Oracle on the same demand seed.
+    const normSeeds = (a, i) => (a.seeds[i] ? a.seeds[i].map((p, j) => p / oracle.seeds[i][j]) : null);
+    const pctGroups = (a, idx) => idx.map((i) => normSeeds(a, i)).filter(Boolean);
+    const scenarioPct = (a, i) => (a.results[i].profit === null ? null : a.results[i].profit / oracle.results[i].profit);
+    const pctMean = (a, idx) => mean(idx.map((i) => scenarioPct(a, i)).filter((x) => x !== null));
+    const selection = () => {
+      const fn = SCN.find((x) => x[0] === state.scn)[2];
+      return order.filter((i) => fn(S[i]) && (state.net === "all" || S[i].network === state.net));
+    };
+    const selName = () => {
+      const PROSE = { main: "main", A_Core: "core-grid", B_PaperReplication: "stationary", D_WalmartM5: "M5", C_MARL: "multi-agent", all: "all" };
+      const n = selection().length, sc = PROSE[state.scn], nt = state.net;
+      return `${sc} scenarios on ${nt === "all" ? "both networks" : nt === "base" ? "the base network" : "the serial chain"} (${n})`;
     };
 
-    function seg(boxId, items, key) {
+    function seg(boxId, items, key, after) {
       const box = $(boxId); box.innerHTML = "";
       items.forEach(([v, lbl, fn]) => {
         const b = document.createElement("button"); b.type = "button";
         const n = fn ? S.filter(fn).length : null;
         b.innerHTML = esc(lbl) + (n !== null ? `<span class="c">${n}</span>` : "");
         b.setAttribute("aria-pressed", state[key] === v ? "true" : "false");
-        b.addEventListener("click", () => { state[key] = v; box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false")); draw(); });
+        b.addEventListener("click", () => { state[key] = v; box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false")); after(); });
         box.appendChild(b);
       });
     }
-    seg("#f-scn", SCN, "scn"); seg("#f-net", NET, "net");
+    const redrawAll = () => { drawBoard(); drawProfiles(); drawFrontier(); };
+    seg("#f-scn", SCN, "scn", redrawAll); seg("#f-net", NET, "net", redrawAll);
     $("#f-metric").value = state.metric; $("#f-abl").checked = state.abl;
-    $("#f-metric").addEventListener("change", (e) => { state.metric = e.target.value; draw(); });
-    $("#f-abl").addEventListener("change", (e) => { state.abl = e.target.checked; draw(); });
+    $("#f-metric").addEventListener("change", (e) => { state.metric = e.target.value; drawBoard(); });
+    $("#f-abl").addEventListener("change", (e) => { state.abl = e.target.checked; redrawAll(); });
 
-    // Diverging scale: red arm for losses, blue arm for profit up to the Oracle's.
     const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-    const mix = (a, b, f) => { const A = hex(a), B = hex(b); return `rgb(${A.map((x, i) => Math.round(x + (B[i] - x) * f)).join(",")})`; };
-    function cellColor(p) {
-      if (p === null) return null;
-      if (p >= 0) return mix(css("--div-pos-lo"), css("--div-pos-hi"), Math.min(1, p));
-      return mix(css("--div-neg-lo"), css("--div-neg-hi"), Math.min(1, -p));
-    }
-    function paintRamp() {
-      $("#ramp").style.background = `linear-gradient(90deg, ${css("--div-neg-hi")}, ${css("--div-neg-lo")} 32%, ${css("--div-mid")} 34%, ${css("--div-pos-lo")} 36%, ${css("--div-pos-hi")})`;
-    }
+    const mix = (a, b, f) => { const P = hex(a), Q = hex(b); return `rgb(${P.map((x, i) => Math.round(x + (Q[i] - x) * f)).join(",")})`; };
+    const cellColor = (p) => (p === null ? null : p >= 0 ? mix(css("--div-pos-lo"), css("--div-pos-hi"), Math.min(1, p)) : mix(css("--div-neg-lo"), css("--div-neg-hi"), Math.min(1, -p)));
 
-    function values(agent, idx) {
-      return idx.map((i) => {
-        const r = agent.results[i], o = oracle.results[i];
-        if (state.metric === "pct") return r.profit === null || !o.profit ? null : r.profit / o.profit;
-        return r[state.metric];
-      });
+    // ── Leaderboard ──────────────────────────────────────
+    function score(a, idx) {
+      const m = state.metric;
+      if (m === "pct" || m === "iqm") {
+        const g = pctGroups(a, idx);
+        if (!g.length) return null;
+        const kind = m === "iqm" ? "iqm" : "mean";
+        return { v: aggregate(g, kind), n: g.length, ci: a.id === "Oracle" ? null : bootstrap(g, kind, kind === "iqm" ? 500 : 1000) };
+      }
+      if (m === "profit") {
+        const g = idx.map((i) => a.seeds[i]).filter(Boolean);
+        return g.length ? { v: aggregate(g, "mean"), n: g.length, ci: bootstrap(g, "mean", 1000) } : null;
+      }
+      const v = idx.map((i) => a.results[i][m]).filter((x) => x !== null);
+      return v.length ? { v: mean(v), n: v.length, ci: null } : null;
     }
-    function draw() {
-      try { localStorage.setItem("gim-board", JSON.stringify(state)); } catch (e) {}
-      paintRamp();
-      const scnFn = SCN.find((x) => x[0] === state.scn)[2];
-      const idx = order.filter((i) => scnFn(S[i]) && (state.net === "all" || S[i].network === state.net));
-      const m = METRIC[state.metric];
-      $("#th-metric").textContent = m.label;
-      const rows = A.filter((a) => state.abl || a.role !== "ablation").map((a) => {
-        const v = values(a, idx).filter((x) => x !== null);
-        const pct = idx.map((i) => { const r = a.results[i].profit, o = oracle.results[i].profit; return r === null ? null : r / o; });
-        return { a, mean: v.length ? v.reduce((s, x) => s + x, 0) / v.length : null, n: v.length, pct };
-      });
-      const ranked = rows.filter((r) => r.a.id !== "Oracle" && r.mean !== null).sort((x, y) => m.dir * (x.mean - y.mean));
+    function drawBoard() {
+      try { localStorage.setItem("gim-board", JSON.stringify({ scn: state.scn, net: state.net, metric: state.metric, abl: state.abl })); } catch (e) {}
+      $("#ramp").style.background = `linear-gradient(90deg, ${css("--div-neg-hi")}, ${css("--div-neg-lo")} 32%, ${css("--div-mid")} 34%, ${css("--div-pos-lo")} 36%, ${css("--div-pos-hi")})`;
+      const idx = selection(), m = METRIC[state.metric];
+      $("#th-metric").textContent = m.label + (m.ci ? " · 95% CI" : "");
+      const rows = A.filter((a) => state.abl || a.role !== "ablation").map((a) => ({ a, s: score(a, idx) }));
       const bound = rows.find((r) => r.a.id === "Oracle");
-      const missing = rows.filter((r) => r.a.id !== "Oracle" && r.mean === null);
-      const all = [bound, ...ranked];
-      const lo = Math.min(0, ...all.map((r) => r.mean)), hi = Math.max(...all.map((r) => r.mean), 1e-9);
-      const span = hi - lo || 1, zx = ((0 - lo) / span) * 100;
+      const ranked = rows.filter((r) => r.a.id !== "Oracle" && r.s).sort((x, y) => m.dir * (x.s.v - y.s.v));
+      const missing = rows.filter((r) => r.a.id !== "Oracle" && !r.s);
+      const all = [bound, ...ranked].filter((r) => r && r.s);
+      const lo = Math.min(0, ...all.map((r) => (r.s.ci ? r.s.ci[0] : r.s.v))), hi = Math.max(1e-9, ...all.map((r) => (r.s.ci ? r.s.ci[1] : r.s.v)));
+      const span = hi - lo || 1, X = (v) => ((v - lo) / span) * 100, zx = X(0);
       const blocks = idx.map((i) => S[i].block);
-      const strip = (r) => r.pct.map((p, j) => {
+      const strip = (a) => idx.map((i, j) => {
         const gap = j > 0 && blocks[j] !== blocks[j - 1] ? '<span class="gap"></span>' : "";
-        const c = cellColor(p);
-        const tipText = `${short(S[idx[j]])}|${p === null ? "not run" : fmt1.format(p * 100) + "% of Oracle"}`;
-        return gap + `<span ${c ? `style="background:${c}"` : 'class="na"'} data-tip="${esc(tipText)}"></span>`;
+        const p = scenarioPct(a, i), c = cellColor(p);
+        return gap + `<span ${c ? `style="background:${c}"` : 'class="na"'} data-tip="${esc(scnShort(S[i]) + "|" + (p === null ? "not run on this scenario" : pctf(p) + " of Oracle"))}"></span>`;
       }).join("");
       const row = (r, rank) => {
-        const left = r.mean >= 0 ? zx : ((r.mean - lo) / span) * 100, width = Math.abs(r.mean) / span * 100;
+        const v = r.s.v, left = Math.min(zx, X(v)), width = Math.abs(X(v) - zx);
+        const ci = r.s.ci ? `<span class="ci" style="left:${X(r.s.ci[0])}%;width:${Math.max(0.6, X(r.s.ci[1]) - X(r.s.ci[0]))}%"></span>` : "";
+        const pm = r.s.ci ? "±" + (state.metric === "profit" ? fmt0.format((r.s.ci[1] - r.s.ci[0]) / 2) : fmt1.format(((r.s.ci[1] - r.s.ci[0]) / 2) * 100)) : "";
         const note = r.a.role === "ablation" ? '<span class="note">ablation</span>' : r.a.id === "Oracle" ? '<span class="note">perfect foresight</span>' : "";
-        const cover = r.n < idx.length ? ` <span class="note">${r.n}/${idx.length}</span>` : "";
-        return `<tr class="${r.a.id === "Oracle" ? "bound" : ""}">
+        const cover = r.s.n < idx.length ? ` <span class="note">${r.s.n} of ${idx.length} scenarios</span>` : "";
+        const open = state.open === r.a.id;
+        const ciTip = r.s.ci ? ` data-tip="${esc(r.a.id + "|" + m.fmt(v) + ", 95% CI " + m.fmt(r.s.ci[0]) + " to " + m.fmt(r.s.ci[1]))}"` : "";
+        let html = `<tr class="row${r.a.id === "Oracle" ? " bound" : ""}" tabindex="0" data-id="${esc(r.a.id)}" aria-expanded="${open}">
           <td class="rank">${rank}</td>
-          <td class="agent">${esc(r.a.id)}${note}${cover}</td>
-          <td><span class="fam"><i style="background:var(${FAM[r.a.family]})"></i>${FAM_LABEL[r.a.family]}</span></td>
+          <td class="agent"><span class="chev" aria-hidden="true">›</span>${esc(r.a.id)}${note}${cover}</td>
+          <td class="fam">${FAM_LABEL[r.a.family]}</td>
           <td>${r.a.id === "Oracle" ? '<span class="access">Full future</span>' : r.a.informed ? '<span class="access">Informed</span>' : '<span class="access blind">Blind</span>'}</td>
-          <td><div class="score"><div class="bar"><span class="zero" style="left:${zx}%"></span><span class="b ${r.mean < 0 ? "neg" : "pos"}" style="left:${left}%;width:${width}%"></span></div><span class="val">${m.fmt(r.mean)}</span></div></td>
-          <td><div class="strip">${strip(r)}</div></td></tr>`;
+          <td><div class="score"><div class="bar"${ciTip}><span class="zero" style="left:${zx}%"></span><span class="b ${v < 0 ? "neg" : "pos"}" style="left:${left}%;width:${width}%"></span>${ci}</div><span class="val">${m.fmt(v)}</span><span class="pm">${pm}</span></div></td>
+          <td><div class="strip">${strip(r.a)}</div></td></tr>`;
+        if (open) html += `<tr class="detail"><td colspan="6">${detail(r.a)}</td></tr>`;
+        return html;
       };
-      $("#board tbody").innerHTML = (bound ? row(bound, "UB") : "") + ranked.map((r, i) => row(r, i + 1)).join("") +
+      $("#board tbody").innerHTML = (bound && bound.s ? row(bound, "UB") : "") + ranked.map((r, i) => row(r, i + 1)).join("") +
         missing.map((r) => `<tr><td class="rank">–</td><td class="agent">${esc(r.a.id)}</td><td colspan="4" class="status">Not evaluated on this selection</td></tr>`).join("");
-      $("#board-n").textContent = `${ranked.length} ranked agents · ${idx.length} scenarios · 10 seeds each`;
-      findings();
+      $("#board-n").textContent = `${ranked.length} ranked agents · ${idx.length} scenarios · ${NS} seeds each`;
+      if (state.open) drawDetailCharts(A.find((a) => a.id === state.open), idx);
+    }
+    const toggle = (id) => { state.open = state.open === id ? null : id; drawBoard(); };
+    $("#board").addEventListener("click", (e) => { const tr = e.target.closest("tr.row"); if (tr) toggle(tr.dataset.id); });
+    $("#board").addEventListener("keydown", (e) => { const tr = e.target.closest("tr.row"); if (tr && e.target === tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(tr.dataset.id); } });
+
+    // ── Row detail: method, profit gap by component, per-scenario results ──
+    const COST = [["revenue", "Revenue", 1], ["procurement", "Procurement", -1], ["holding", "Holding", -1], ["backlog", "Backlog penalty", -1], ["operating", "Operating", -1], ["fixed", "Fixed ordering", -1]];
+    function detail(a) {
+      const chips = [FAM_LABEL[a.family], a.id === "Oracle" ? "Full future demand" : a.informed ? "Informed" : "Blind", a.role === "ablation" ? "Ablation" : a.role === "bound" ? "Upper bound" : "Primary roster"];
+      const gapTitle = a.id === "Oracle" ? "Where the Oracle's profit comes from" : "Profit gap to the Oracle, by component";
+      const gapNote = a.id === "Oracle" ? "Average per episode over the selected scenarios, summed over all nodes." : "Average per episode over the selected scenarios, summed over all nodes. Blue narrows the gap; red widens it.";
+      return `<div class="detail-grid">
+        <div><h4>Method</h4><p>${esc(a.desc)}</p><div class="chips">${chips.map((c) => `<span class="chip">${esc(c)}</span>`).join("")}</div></div>
+        <div><h4>${gapTitle}</h4><p class="small">${gapNote}</p><svg class="plot" id="dt-gap" height="170"></svg></div>
+        <div><h4>Per scenario, % of Oracle</h4><p class="small">Dot: mean over ${NS} seeds. Whisker: ±1 standard deviation across seeds.</p><svg class="plot" id="dt-scn" height="200"></svg></div>
+      </div>`;
+    }
+    function drawDetailCharts(a, idx) {
+      const gapSvg = $("#dt-gap"), scnSvg = $("#dt-scn");
+      if (!gapSvg || !a) return;
+      const use = idx.filter((i) => a.costs[i]);
+      const avg = (who, k) => mean(use.map((i) => who.costs[i][k]));
+      const items = use.length ? COST.map(([k, label, sgn]) => ({ label, v: a.id === "Oracle" ? sgn * avg(a, k) : sgn * (avg(a, k) - avg(oracle, k)) })).filter((x) => Math.abs(x.v) >= 0.5) : [];
+      items.push({ label: a.id === "Oracle" ? "Profit" : "Profit gap", v: items.reduce((s, x) => s + x.v, 0), total: true });
+      {
+        const w = gapSvg.clientWidth || 300, rowH = 24, h = items.length * rowH + 8, L = 108, R = 6, pad = 46;
+        gapSvg.setAttribute("viewBox", `0 0 ${w} ${h}`); gapSvg.setAttribute("height", h);
+        const ext = Math.max(...items.map((x) => Math.abs(x.v)), 1), X = (v) => L + pad + (w - L - R - 2 * pad) * ((v + ext) / (2 * ext));
+        let s = `<line class="axis" x1="${X(0)}" x2="${X(0)}" y1="2" y2="${h - 4}"/>`;
+        items.forEach((it, j) => {
+          const y = 6 + j * rowH, x0 = Math.min(X(0), X(it.v)), bw = Math.abs(X(it.v) - X(0));
+          const fill = it.total ? "var(--ink)" : it.v >= 0 ? "var(--up)" : "var(--critical)";
+          s += `<text x="${L - 8}" y="${y + 12}" text-anchor="end" style="fill:var(--ink-2)${it.total ? ";font-weight:600" : ""}">${esc(it.label)}</text>`;
+          s += `<rect x="${x0}" y="${y + 3}" width="${Math.max(1, bw)}" height="12" rx="2" fill="${fill}" opacity="${it.total ? 0.85 : 0.75}"/>`;
+          s += `<text x="${it.v >= 0 ? X(it.v) + 5 : X(it.v) - 5}" y="${y + 12}" text-anchor="${it.v >= 0 ? "start" : "end"}" style="fill:var(--ink);font-family:var(--f-mono)">${it.v >= 0 ? "+" : "−"}${fmt0.format(Math.abs(it.v))}</text>`;
+        });
+        gapSvg.innerHTML = s;
+      }
+      {
+        const w = scnSvg.clientWidth || 340, rowH = 17, top = 16, h = top + idx.length * rowH + 6, L = Math.min(205, w * 0.56), R = 10;
+        scnSvg.setAttribute("viewBox", `0 0 ${w} ${h}`); scnSvg.setAttribute("height", h);
+        const vals = idx.map((i) => { const g = normSeeds(a, i); if (!g) return null; const m = mean(g); return { m, sd: Math.sqrt(mean(g.map((x) => (x - m) ** 2))) }; });
+        const ok = vals.filter(Boolean), lo = Math.min(0, ...ok.map((v) => v.m - v.sd)), hi = Math.max(1, ...ok.map((v) => v.m + v.sd));
+        const X = (v) => L + (w - L - R) * ((v - lo) / (hi - lo));
+        let s = "";
+        [0, 0.5, 1].forEach((t) => { s += `<line x1="${X(t)}" x2="${X(t)}" y1="${top - 2}" y2="${h - 4}" stroke="var(--line)"/><text x="${X(t)}" y="9" text-anchor="middle">${t * 100}%</text>`; });
+        vals.forEach((v, j) => {
+          const i = idx[j], y = top + j * rowH + rowH / 2;
+          if (j > 0 && S[i].block !== S[idx[j - 1]].block) s += `<line x1="0" x2="${w}" y1="${y - rowH / 2}" y2="${y - rowH / 2}" stroke="var(--line-strong)"/>`;
+          s += `<text x="${L - 8}" y="${y + 3.5}" text-anchor="end" style="font-size:10.5px">${esc(scnShort(S[i]))}</text>`;
+          if (!v) { s += `<text x="${L + 4}" y="${y + 3.5}" style="font-size:10.5px">not run</text>`; return; }
+          s += `<line x1="${X(v.m - v.sd)}" x2="${X(v.m + v.sd)}" y1="${y}" y2="${y}" stroke="var(--ink-2)" stroke-width="1.5"/>`;
+          s += `<circle cx="${X(v.m)}" cy="${y}" r="4" fill="${v.m < 0 ? "var(--critical)" : "var(--ink)"}" stroke="var(--surface)" stroke-width="1.5" data-tip="${esc(scnShort(S[i]) + "|" + pctf(v.m) + " ± " + fmt1.format(v.sd * 100) + " points")}"/>`;
+        });
+        scnSvg.innerHTML = s;
+      }
     }
 
-    // Headline findings, computed from the same artifact so they never drift from the CSV.
-    function findings() {
-      const idx = order.filter((i) => S[i].block !== "C_MARL");
-      const pctMean = (a) => { const v = idx.map((i) => a.results[i].profit / oracle.results[i].profit).filter((x) => !isNaN(x)); return v.reduce((s, x) => s + x, 0) / v.length; };
-      const blockPct = (a, blk) => { const v = S.map((s, i) => (s.block === blk ? a.results[i].profit / oracle.results[i].profit : null)).filter((x) => x !== null); return v.reduce((s, x) => s + x, 0) / v.length; };
-      const tMean = (a) => idx.reduce((s, i) => s + (a.results[i].time_sec || 0), 0) / idx.length;
-      const primary = A.filter((a) => a.role === "primary");
-      const best = (pool) => pool.map((a) => ({ a, p: pctMean(a) })).sort((x, y) => y.p - x.p)[0];
-      const bOR = best(primary), bRL = best(primary.filter((a) => a.family === "RL")), bIL = best(primary.filter((a) => a.family === "Imitation"));
-      const f = (b, text) => `<div class="finding"><span class="big">${fmt1.format(b.p * 100)}%</span><span class="who">${esc(b.a.id)}</span><p>${text}</p></div>`;
-      $("#findings").innerHTML =
-        f(bOR, `Best non-oracle method on the 22 main scenarios, at ${fmt1.format(tMean(bOR.a))} s of online compute per episode.`) +
-        f(bRL, `Best learned policy, with ${tMean(bRL.a).toFixed(2)} s per episode at inference.`) +
-        f(bIL, `Best imitation learner: ${fmt0.format(blockPct(bIL.a, "B_PaperReplication") * 100)}% under stationary demand, ${fmt0.format(blockPct(bIL.a, "A_Core") * 100)}% once trend, seasonality and shocks enter.`);
-      const cells = A.reduce((s, a) => s + a.results.filter((r) => r.profit !== null).length, 0);
-      $("#f-episodes").textContent = fmt0.format(cells * 10);
-    }
-
-    $("#board").addEventListener("pointermove", (e) => {
-      const t = e.target.closest("[data-tip]");
-      if (!t) return hideTip();
-      const [a, b] = t.dataset.tip.split("|");
-      showTip(`<span class="t">${esc(a)}</span><b>${esc(b)}</b>`, e.clientX, e.clientY);
+    // ── Robustness: rankings under each factor level ─────
+    const coreIdx = order.filter((i) => S[i].block === "A_Core");
+    const mainIdx = order.filter((i) => S[i].block !== "C_MARL");
+    const roster = A.filter((a) => a.role === "primary" || a.role === "llm");
+    const FACTORS = [
+      { name: "Network", lo: "base", hi: "serial", loL: "Base network", hiL: "Serial chain", test: (s) => s.network === "serial" },
+      { name: "Demand shock", lo: "no shock", hi: "shock", loL: "Without shock", hiL: "With shock", test: (s) => s.demand.includes("shock") },
+      { name: "Goodwill", lo: "off", hi: "on", loL: "Goodwill off", hiL: "Goodwill on", test: (s) => s.goodwill },
+      { name: "Shortage handling", lo: "backorders", hi: "lost sales", loL: "Backorders", hiL: "Lost sales", test: (s) => !s.backlog },
+    ];
+    FACTORS.forEach((f) => {
+      const L = coreIdx.filter((i) => !f.test(S[i])), H = coreIdx.filter((i) => f.test(S[i]));
+      f.rows = roster.map((a) => ({ id: a.id, lo: pctMean(a, L), hi: pctMean(a, H) }));
+      ["lo", "hi"].forEach((key) => { const s = f.rows.slice().sort((x, y) => y[key] - x[key]); f.rows.forEach((r) => (r[key + "R"] = s.indexOf(r) + 1)); });
+      f.tau = kendall(f.rows.map((r) => r.lo), f.rows.map((r) => r.hi));
+      f.movers = f.rows.filter((r) => Math.abs(r.loR - r.hiR) >= 5).length;
     });
-    $("#board").addEventListener("pointerleave", hideTip);
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    mq.addEventListener?.("change", draw);
-    new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    draw();
+    let curF = 0;
+    $("#factors").innerHTML = FACTORS.map((f, i) => `<button class="factor" type="button" aria-pressed="${i === curF}" data-i="${i}">
+      <span class="label">${esc(f.name)}</span><span class="what">${esc(f.lo)} → ${esc(f.hi)}</span>
+      <span class="tau">${f.tau.toFixed(2)}<small>Kendall τ</small></span><span class="mv">${f.movers} agent${f.movers === 1 ? "" : "s"} move 5+ places</span></button>`).join("");
+    $("#factors").addEventListener("click", (e) => { const b = e.target.closest(".factor"); if (!b) return; curF = +b.dataset.i; $("#factors").querySelectorAll(".factor").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false")); drawSlope(); });
+    {
+      // Scale reference: typical half-width of a seed-bootstrap interval on the main scenarios.
+      const widths = roster.map((a) => { const ci = bootstrap(pctGroups(a, mainIdx), "mean", 400); return (ci[1] - ci[0]) / 2; }).sort((a, b) => a - b);
+      $("#rb-noise").textContent = `For scale, seed noise moves a typical agent's main-grid score by about ±${fmt1.format(widths[Math.floor(widths.length / 2)] * 100)} points (median 95% interval).`;
+    }
+    const slope = $("#slope");
+    function drawSlope() {
+      const f = FACTORS[curF], n = f.rows.length;
+      const w = Math.max(400, slope.parentElement.clientWidth), rowH = 22, top = 30, h = top + n * rowH + 6;
+      const LW = Math.min(190, Math.max(w * 0.3, (w - 90) / 2)), x1 = LW + 12, x2 = w - LW - 12;
+      slope.setAttribute("viewBox", `0 0 ${w} ${h}`); slope.setAttribute("height", h); slope.style.width = w + "px";
+      $("#slope-title").textContent = `Rank by mean % of Oracle: ${f.loL.toLowerCase()} vs ${f.hiL.toLowerCase()}`;
+      const Y = (r) => top + (r - 0.5) * rowH;
+      let s = `<text class="head" x="${x1 + 4}" y="14" text-anchor="end">${esc(f.loL)}</text><text class="head" x="${x2 - 4}" y="14">${esc(f.hiL)}</text>`;
+      f.rows.slice().sort((a, b) => Math.abs(a.loR - a.hiR) - Math.abs(b.loR - b.hiR)).forEach((r) => {
+        const d = r.loR - r.hiR, mover = Math.abs(d) >= 5, col = !mover ? "var(--other-line)" : d > 0 ? "var(--up)" : "var(--critical)";
+        const tipTxt = `${r.id}|#${r.loR} (${pctf(r.lo)}) → #${r.hiR} (${pctf(r.hi)})`;
+        s += `<g class="r" data-tip="${esc(tipTxt)}">
+          <line x1="${x1}" x2="${x2}" y1="${Y(r.loR)}" y2="${Y(r.hiR)}" stroke="${col}" stroke-width="${mover ? 2 : 1.25}" stroke-linecap="round"/>
+          <circle cx="${x1}" cy="${Y(r.loR)}" r="3.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5"/><circle cx="${x2}" cy="${Y(r.hiR)}" r="3.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5"/>
+          <text class="lbl${mover ? " hi" : ""}" x="${x1 - 12}" y="${Y(r.loR) + 4}" text-anchor="end">${esc(r.id)} <tspan class="val">${fmt0.format(r.lo * 100)}%</tspan></text>
+          <text class="lbl${mover ? " hi" : ""}" x="${x2 + 12}" y="${Y(r.hiR) + 4}"><tspan class="val">${fmt0.format(r.hi * 100)}%</tspan> ${esc(r.id)}</text>
+          <rect x="0" y="${Y(r.loR) - rowH / 2}" width="${x1 + 4}" height="${rowH}" fill="transparent"/><rect x="${x2 - 4}" y="${Y(r.hiR) - rowH / 2}" width="${w - x2 + 4}" height="${rowH}" fill="transparent"/>
+        </g>`;
+      });
+      slope.innerHTML = s;
+    }
+    slope.addEventListener("pointerover", (e) => { const g = e.target.closest("g.r"); slope.querySelectorAll("g.r").forEach((x) => x.classList.toggle("dim", !!g && x !== g)); });
+    slope.addEventListener("pointerleave", () => slope.querySelectorAll("g.r").forEach((x) => x.classList.remove("dim")));
+
+    // ── Findings strip, computed from the artifact ─────────
+    {
+      const blockPct = (a, blk) => pctMean(a, S.map((s, i) => i).filter((i) => S[i].block === blk));
+      const tMean = (a) => mean(mainIdx.map((i) => a.results[i].time_sec || 0));
+      const primary = A.filter((a) => a.role === "primary");
+      const best = (pool) => pool.map((a) => ({ a, p: pctMean(a, mainIdx) })).sort((x, y) => y.p - x.p)[0];
+      const bOR = best(primary), bRL = best(primary.filter((a) => a.family === "RL")), bIL = best(primary.filter((a) => a.family === "Imitation"));
+      const worstF = FACTORS.slice().sort((a, b) => a.tau - b.tau)[0];
+      const mv = worstF.rows.slice().sort((a, b) => Math.abs(b.loR - b.hiR) - Math.abs(a.loR - a.hiR))[0];
+      const f = (big, who, text) => `<div class="finding"><span class="big">${big}</span><span class="who">${esc(who)}</span><p>${text}</p></div>`;
+      $("#findings").innerHTML =
+        f(pctf(bOR.p), bOR.a.id, `Best non-oracle method on the 22 main scenarios, at ${fmt1.format(tMean(bOR.a))} s of compute per episode.`) +
+        f(pctf(bRL.p), bRL.a.id, `Best learned policy, at ${tMean(bRL.a).toFixed(2)} s per episode.`) +
+        f(pctf(bIL.p), bIL.a.id, `Best imitation learner: ${fmt0.format(blockPct(bIL.a, "B_PaperReplication") * 100)}% under stationary demand, ${fmt0.format(blockPct(bIL.a, "A_Core") * 100)}% once trend, seasonality and shocks enter.`) +
+        f("τ = " + worstF.tau.toFixed(2), `${worstF.lo} → ${worstF.hi}`, `Rank agreement when only the ${worstF.name.toLowerCase()} changes. ${esc(mv.id)} moves from #${mv.loR} to #${mv.hiR}. <a href="#robustness">See all four factors</a>.`);
+      $("#f-episodes").textContent = fmt0.format(A.reduce((s, a) => s + a.results.filter((r) => r.profit !== null).length, 0) * NS);
+    }
+
+    // ── Performance profiles ───────────────────────────────
+    const ppSel = ["MSSP-I", "PPO-Transformer", "(s,S)-I", "DAgger-G", "LLM-Policy-C"].filter((id) => A.some((a) => a.id === id));
+    const SLOTS = ["--c1", "--c2", "--c3", "--c4", "--c5"];
+    const ppColor = {}; ppSel.forEach((id, i) => (ppColor[id] = SLOTS[i]));
+    const ppSvg = $("#ch-pp"), PM = { l: 40, r: 12, t: 10, b: 32 };
+    let ppRef = null;
+    function drawPick() {
+      const pool = A.filter((a) => a.id !== "Oracle" && (state.abl || a.role !== "ablation") && !ppSel.includes(a.id));
+      $("#pp-pick").innerHTML = ppSel.map((id) => `<button class="pchip" type="button" data-rm="${esc(id)}" aria-label="Remove ${esc(id)}"><i style="background:var(${ppColor[id]})"></i>${esc(id)}<span class="x" aria-hidden="true">×</span></button>`).join("") +
+        (ppSel.length < 5 ? `<select id="pp-add" aria-label="Add an agent"><option value="">Add agent…</option>${pool.map((a) => `<option>${esc(a.id)}</option>`).join("")}</select>` : `<span class="muted" style="font-size:0.8rem">Five at most; remove one to add another.</span>`);
+    }
+    $("#pp-pick").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; const id = b.dataset.rm; ppSel.splice(ppSel.indexOf(id), 1); delete ppColor[id]; drawProfiles(); });
+    $("#pp-pick").addEventListener("change", (e) => {
+      if (e.target.id !== "pp-add" || !e.target.value) return;
+      const id = e.target.value; ppColor[id] = SLOTS.find((c) => !Object.values(ppColor).includes(c)); ppSel.push(id); drawProfiles();
+    });
+    function drawProfiles() {
+      drawPick();
+      $("#tr-sel").textContent = selName();
+      const idx = selection(), w = ppSvg.clientWidth || 480, h = 260;
+      ppSvg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      const X = (t) => PM.l + (w - PM.l - PM.r) * t, Y = (v) => PM.t + (h - PM.t - PM.b) * (1 - v);
+      let s = `<g class="grid">`;
+      [0, 0.25, 0.5, 0.75, 1].forEach((v) => { s += `<line x1="${PM.l}" x2="${w - PM.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${PM.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${v * 100}%</text>`; });
+      s += `</g>`;
+      [0, 0.25, 0.5, 0.75, 1].forEach((t) => { s += `<text x="${X(t)}" y="${h - 16}" text-anchor="middle">${t * 100}%</text>`; });
+      s += `<text x="${(PM.l + w - PM.r) / 2}" y="${h - 1}" text-anchor="middle">fraction of the Oracle's profit reached</text>`;
+      const curves = {};
+      ppSel.forEach((id) => {
+        const runs = pctGroups(A.find((x) => x.id === id), idx).flat();
+        if (!runs.length) return;
+        const pts = [];
+        for (let k = 0; k <= 100; k++) { let c = 0; for (const r of runs) if (r >= k / 100) c++; pts.push(c / runs.length); }
+        curves[id] = pts;
+        s += `<path d="M${pts.map((v, k) => `${X(k / 100).toFixed(1)},${Y(v).toFixed(1)}`).join("L")}" fill="none" stroke="var(${ppColor[id]})" stroke-width="2" stroke-linejoin="round"/>`;
+      });
+      s += `<line id="pp-x" y1="${PM.t}" y2="${h - PM.b}" stroke="var(--line-strong)" visibility="hidden"/><rect class="hit" x="${PM.l}" y="0" width="${w - PM.l - PM.r}" height="${h - PM.b}" fill="transparent"/>`;
+      ppSvg.innerHTML = s; ppRef = { X, w, curves };
+    }
+    ppSvg.addEventListener("pointermove", (e) => {
+      if (!ppRef || !e.target.classList.contains("hit")) return;
+      const r = ppSvg.getBoundingClientRect(), x = (e.clientX - r.left) * (ppRef.w / r.width);
+      const k = Math.max(0, Math.min(100, Math.round(((x - PM.l) / (ppRef.w - PM.l - PM.r)) * 100)));
+      const line = ppSvg.querySelector("#pp-x"); line.setAttribute("x1", ppRef.X(k / 100)); line.setAttribute("x2", ppRef.X(k / 100)); line.setAttribute("visibility", "visible");
+      showTip(`<span class="t">reach at least ${k}% of Oracle profit</span>` + Object.entries(ppRef.curves).map(([id, pts]) => `${esc(id)}: <b>${fmt0.format(pts[k] * 100)}%</b> of episodes`).join("<br>"), e.clientX, e.clientY);
+    });
+    ppSvg.addEventListener("pointerleave", () => { hideTip(); const l = ppSvg.querySelector("#pp-x"); if (l) l.setAttribute("visibility", "hidden"); });
+
+    // ── Profit against compute ─────────────────────────────
+    const frSvg = $("#ch-fr"), FM = { l: 44, r: 16, t: 16, b: 34 };
+    let frPts = [], frW = 480;
+    function drawFrontier() {
+      const idx = selection(), w = frSvg.clientWidth || 480, h = 300;
+      frSvg.setAttribute("viewBox", `0 0 ${w} ${h}`); frW = w;
+      const pts = A.filter((a) => a.id !== "Oracle" && (state.abl || a.role !== "ablation")).map((a) => {
+        const p = pctMean(a, idx), times = idx.map((i) => a.results[i].time_sec).filter((x) => x !== null && x > 0);
+        return isFinite(p) && times.length ? { id: a.id, fam: FAM_LABEL[a.family], p, t: mean(times) } : null;
+      }).filter(Boolean).sort((a, b) => a.t - b.t);
+      let bestP = -Infinity; pts.forEach((q) => { q.front = q.p > bestP; if (q.front) bestP = q.p; });
+      const lx = Math.log10, x0 = lx(Math.min(...pts.map((q) => q.t))) - 0.2, x1 = lx(Math.max(...pts.map((q) => q.t))) + 0.2;
+      const yLo = Math.min(0, Math.floor(Math.min(...pts.map((q) => q.p)) * 4) / 4), yHi = 1;
+      const X = (t) => FM.l + (w - FM.l - FM.r) * ((lx(t) - x0) / (x1 - x0)), Y = (v) => FM.t + (h - FM.t - FM.b) * (1 - (v - yLo) / (yHi - yLo));
+      let s = `<g class="grid">`;
+      for (let v = yLo; v <= yHi + 1e-9; v += 0.25) s += `<line x1="${FM.l}" x2="${w - FM.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${FM.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${fmt0.format(v * 100)}%</text>`;
+      for (let e = Math.ceil(x0); e <= x1; e++) s += `<line x1="${X(10 ** e)}" x2="${X(10 ** e)}" y1="${FM.t}" y2="${h - FM.b}"/><text x="${X(10 ** e)}" y="${h - FM.b + 16}" text-anchor="middle">${e >= 0 ? 10 ** e : (10 ** e).toFixed(-e)} s</text>`;
+      s += `</g><text x="${(FM.l + w - FM.r) / 2}" y="${h - 2}" text-anchor="middle">seconds per episode, log scale</text>`;
+      const fr = pts.filter((q) => q.front);
+      s += `<path d="M${fr.map((q, i) => (i ? `${X(q.t).toFixed(1)},${Y(fr[i - 1].p).toFixed(1)} L` : "") + `${X(q.t).toFixed(1)},${Y(q.p).toFixed(1)}`).join(" L")}" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.55"/>`;
+      pts.filter((q) => !q.front).forEach((q) => { s += `<circle cx="${X(q.t)}" cy="${Y(q.p)}" r="4.5" fill="var(--other-line)" stroke="var(--surface)" stroke-width="2"/>`; });
+      // Frontier labels: try positions around each point and keep the first that clears
+      // every point and every label already placed.
+      const boxes = pts.map((q) => ({ x: X(q.t) - 6, y: Y(q.p) - 6, w: 12, h: 12 }));
+      const hit = (b) => boxes.some((o) => b.x < o.x + o.w && b.x + b.w > o.x && b.y < o.y + o.h && b.y + b.h > o.y);
+      fr.forEach((q) => {
+        const px = X(q.t), py = Y(q.p), tw = q.id.length * 6.4 + 4, th = 13;
+        const cands = [];
+        [-16, 6, -30, 20, -44, 34, -58, 48].forEach((dy) => cands.push([8, dy, "start"], [-8, dy, "end"], [0, dy < 0 ? dy - 8 : dy + 6, "middle"]));
+        let pick = null;
+        for (const [dx, dy, anchor] of cands) {
+          const bx = anchor === "start" ? px + dx : anchor === "end" ? px + dx - tw : px - tw / 2, b = { x: bx, y: py + dy, w: tw, h: th };
+          if (b.x < FM.l || b.x + b.w > w - 2 || b.y < 0 || b.y + b.h > h - FM.b) continue;
+          if (!hit(b)) { pick = { b, anchor, far: Math.abs(dy) > 20 }; break; }
+        }
+        if (!pick) pick = { b: { x: px + 8, y: py - 16, w: tw, h: th }, anchor: "start", far: false };
+        boxes.push(pick.b);
+        const tx = pick.anchor === "start" ? pick.b.x : pick.anchor === "end" ? pick.b.x + tw : pick.b.x + tw / 2;
+        if (pick.far) {
+          const ly = pick.b.y < py ? pick.b.y + th + 2 : pick.b.y - 1, lx = Math.max(pick.b.x, Math.min(px, pick.b.x + tw));
+          s += `<line x1="${px}" y1="${py}" x2="${lx}" y2="${ly}" stroke="var(--muted)" stroke-width="1"/>`;
+        }
+        s += `<circle cx="${px}" cy="${py}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/><text x="${tx}" y="${pick.b.y + 10}" text-anchor="${pick.anchor}" style="fill:var(--ink);font-family:var(--f-mono);font-size:10.5px">${esc(q.id)}</text>`;
+      });
+      frSvg.innerHTML = s;
+      frPts = pts.map((q) => ({ ...q, x: X(q.t), y: Y(q.p) }));
+    }
+    frSvg.addEventListener("pointermove", (e) => {
+      const r = frSvg.getBoundingClientRect(), sc = frW / r.width, x = (e.clientX - r.left) * sc, y = (e.clientY - r.top) * sc;
+      let bestQ = null, bd = 196;
+      frPts.forEach((q) => { const d = (q.x - x) ** 2 + (q.y - y) ** 2; if (d < bd) { bd = d; bestQ = q; } });
+      if (!bestQ) return hideTip();
+      showTip(`<span class="t">${esc(bestQ.fam)}${bestQ.front ? " · not dominated" : ""}</span><b>${esc(bestQ.id)}</b><br>${pctf(bestQ.p)} of Oracle · ${bestQ.t < 1 ? bestQ.t.toFixed(3) : fmt1.format(bestQ.t)} s`, e.clientX, e.clientY);
+    });
+    frSvg.addEventListener("pointerleave", hideTip);
+
+    drawBoard(); drawSlope(); drawProfiles(); drawFrontier();
+    onTheme(drawBoard);
+    let rz, lastW = 0;
+    new ResizeObserver(() => {
+      const wNow = $("main").clientWidth; if (wNow === lastW) return; lastW = wNow;
+      clearTimeout(rz); rz = setTimeout(() => { drawSlope(); drawProfiles(); drawFrontier(); if (state.open) drawDetailCharts(A.find((a) => a.id === state.open), selection()); }, 80);
+    }).observe($("main"));
   }
 
-  const load = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  load("data/rollouts.json").then(initPlayer).catch((e) => { $("#net").outerHTML = `<p class="status">Could not load the rollout data (${esc(e.message)}). Serve this folder over HTTP, for example with <code>python -m http.server</code>.</p>`; });
-  load("data/leaderboard.json").then(initBoard).catch((e) => { $("#board tbody").innerHTML = `<tr><td colspan="6" class="status">Could not load results (${esc(e.message)}).</td></tr>`; });
+  // ════════════════════════════════════════════════════════
+  // Topology library
+  // ════════════════════════════════════════════════════════
+  function initTopologies(list) {
+    $("#topos").innerHTML = list.map((t) => {
+      const W = 260, H = 128, maxD = Math.max(...t.nodes.map((n) => n.depth)), cols = {}, p = {};
+      t.nodes.forEach((n) => (cols[n.depth] = cols[n.depth] || []).push(n));
+      Object.entries(cols).forEach(([d, ns]) => {
+        const gap = ns.length > 1 ? Math.min(36, (H - 24) / (ns.length - 1)) : 0;
+        ns.sort((a, b) => a.id - b.id).forEach((n, i) => { p[n.id] = { x: 16 + (W - 32) * (d / maxD), y: H / 2 + (i - (ns.length - 1) / 2) * gap }; });
+      });
+      let s = "";
+      t.edges.forEach((e) => { const a = p[e.from], b = p[e.to], dx = (b.x - a.x) / 2; s += `<path class="e" d="M${a.x},${a.y} C${a.x + dx},${a.y} ${b.x - dx},${b.y} ${b.x},${b.y}"/>`; });
+      t.nodes.forEach((n) => {
+        const q = p[n.id];
+        s += n.role === "market" ? `<circle class="n mkt" cx="${q.x}" cy="${q.y}" r="5"/>` : `<rect class="n${n.role === "raw_materials" ? " raw" : ""}" x="${q.x - 9}" y="${q.y - 7}" width="18" height="14" rx="3"/>`;
+      });
+      return `<div class="topo"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t.name)} topology diagram">${s}</svg>
+        <h4>${esc(t.name)}</h4><span class="meta">${t.nodes.length} nodes · ${t.actions} order decisions · ${esc(t.source.split("/").pop())}</span><p>${esc(t.blurb)}</p></div>`;
+    }).join("");
+  }
+
+  load("data/rollouts/index.json").then(initPlayer).catch((e) => { $("#net").outerHTML = `<p class="status">Could not load the rollout data (${esc(e.message)}). Serve this folder over HTTP, for example with <code>python -m http.server</code>.</p>`; });
+  load("data/leaderboard.json").then(initResults).catch((e) => { console.error(e); $("#board tbody").innerHTML = `<tr><td colspan="6" class="status">Could not load results (${esc(e.message)}).</td></tr>`; });
+  load("data/topologies.json").then(initTopologies).catch(() => { $("#topos").innerHTML = '<p class="status">Could not load the topology library.</p>'; });
 })();
 </script>
 </body>

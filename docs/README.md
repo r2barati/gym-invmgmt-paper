@@ -5,11 +5,15 @@ folder by `.github/workflows/pages.yml` on every push to `main` that touches `do
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | The page: animated rollout player, leaderboard, quick start, citation. No build step. |
-| `data/leaderboard.json` | Compact export of `results/benchmark_final_merged.csv`. |
-| `data/rollouts.json` | Per-period state of four weight-free policies on one benchmark scenario (seed 0). |
+| `index.html` | The page: rollout player, leaderboard with confidence intervals and row details, robustness and reliability charts, environment reference, quick start, citation. No build step. |
+| `data/leaderboard.json` | Per-scenario means from `results/benchmark_final_merged.csv`, per-seed profits and cost breakdowns from `results/cache_v2/`, and one-line method descriptions. |
+| `data/rollouts/` | Per-period state of five weight-free policies on each of the 22 main scenarios, at benchmark seed 42. One file per scenario plus `index.json`. |
+| `data/topologies.json` | The two benchmark networks and the YAML networks in `gym_invmgmt/topologies/`. |
 | `media/teaser.mp4`, `media/teaser-poster.png` | Teaser clip of the player for the README, slides and social posts. |
 | `scripts/` | Generators for everything in `data/` and `media/`. |
+
+Every number on the page is computed in the browser from these files, so regenerating
+them after a new benchmark run updates the whole page.
 
 ## Regenerate
 
@@ -18,7 +22,8 @@ From the repository root:
 ```bash
 pip install -e ".[or]"
 python docs/scripts/export_leaderboard.py
-python docs/scripts/export_rollouts.py
+python docs/scripts/export_rollouts.py      # about 5 minutes; MSSP-I re-solves every period
+python docs/scripts/export_topologies.py
 
 # Teaser video (needs Node, Playwright with Chromium, and ffmpeg)
 (cd docs && python3 -m http.server 8765) &

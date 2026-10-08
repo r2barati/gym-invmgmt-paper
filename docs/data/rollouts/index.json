@@ -1,0 +1,101 @@
+{
+ "default": "A_Core|base|trend+seasonal+shock|GW:False|BL:True|MARL:False",
+ "agents": [
+  "Oracle",
+  "MSSP-I",
+  "Newsvendor-I",
+  "(s,S)",
+  "DLP"
+ ],
+ "seed": 42,
+ "scenarios": [
+  {
+   "key": "A_Core|base|trend+seasonal|GW:False|BL:True|MARL:False",
+   "file": "a-core-base-trend-seasonal-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal|GW:False|BL:False|MARL:False",
+   "file": "a-core-base-trend-seasonal-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal|GW:True|BL:True|MARL:False",
+   "file": "a-core-base-trend-seasonal-gw-true-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal|GW:True|BL:False|MARL:False",
+   "file": "a-core-base-trend-seasonal-gw-true-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal+shock|GW:False|BL:True|MARL:False",
+   "file": "a-core-base-trend-seasonal-shock-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal+shock|GW:False|BL:False|MARL:False",
+   "file": "a-core-base-trend-seasonal-shock-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal+shock|GW:True|BL:True|MARL:False",
+   "file": "a-core-base-trend-seasonal-shock-gw-true-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|base|trend+seasonal+shock|GW:True|BL:False|MARL:False",
+   "file": "a-core-base-trend-seasonal-shock-gw-true-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal|GW:False|BL:True|MARL:False",
+   "file": "a-core-serial-trend-seasonal-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal|GW:False|BL:False|MARL:False",
+   "file": "a-core-serial-trend-seasonal-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal|GW:True|BL:True|MARL:False",
+   "file": "a-core-serial-trend-seasonal-gw-true-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal|GW:True|BL:False|MARL:False",
+   "file": "a-core-serial-trend-seasonal-gw-true-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal+shock|GW:False|BL:True|MARL:False",
+   "file": "a-core-serial-trend-seasonal-shock-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal+shock|GW:False|BL:False|MARL:False",
+   "file": "a-core-serial-trend-seasonal-shock-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal+shock|GW:True|BL:True|MARL:False",
+   "file": "a-core-serial-trend-seasonal-shock-gw-true-bl-true-marl-false.json"
+  },
+  {
+   "key": "A_Core|serial|trend+seasonal+shock|GW:True|BL:False|MARL:False",
+   "file": "a-core-serial-trend-seasonal-shock-gw-true-bl-false-marl-false.json"
+  },
+  {
+   "key": "B_PaperReplication|base|stationary|GW:False|BL:True|MARL:False",
+   "file": "b-paperreplication-base-stationary-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "B_PaperReplication|base|stationary|GW:False|BL:False|MARL:False",
+   "file": "b-paperreplication-base-stationary-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "B_PaperReplication|serial|stationary|GW:False|BL:True|MARL:False",
+   "file": "b-paperreplication-serial-stationary-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "B_PaperReplication|serial|stationary|GW:False|BL:False|MARL:False",
+   "file": "b-paperreplication-serial-stationary-gw-false-bl-false-marl-false.json"
+  },
+  {
+   "key": "D_WalmartM5|base|M5_volatile|GW:False|BL:True|MARL:False",
+   "file": "d-walmartm5-base-m5-volatile-gw-false-bl-true-marl-false.json"
+  },
+  {
+   "key": "D_WalmartM5|serial|M5_volatile|GW:False|BL:True|MARL:False",
+   "file": "d-walmartm5-serial-m5-volatile-gw-false-bl-true-marl-false.json"
+  }
+ ]
+}
