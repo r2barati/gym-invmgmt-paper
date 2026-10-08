@@ -15,7 +15,8 @@ An open-source simulation framework bridging Operations Research (OR) and Machin
   - `data_adapters.py`: Dataset adapters for M5-style wide sales files,
     generic long-format demand CSVs, and node/edge CSV topology conversion.
 - `agents/`: Implementation of 28 evaluation agent configurations plus 1 theoretical Oracle upper bound.
-- `benchmarks/`: Scripts to run the evaluation matrix across 26 scenarios (22 main + 4 MARL supplementary).
+- `benchmarks/`: Scripts to run the evaluation matrix across 26 scenarios (22 main + 4 MARL supplementary),
+  plus `evaluate_custom.py` for comparing your own agent against the published results.
 - `results/`: Benchmark outputs.
   - `cache_v2/`: Per-agent CSV caches (one file per agent).
   - `diagnostics/`: Supplementary diagnostic runs not merged into the
@@ -28,6 +29,7 @@ An open-source simulation framework bridging Operations Research (OR) and Machin
 | Goal | Path | Requirements |
 |---|---|---|
 | Try the environment (about 5 minutes) | `pip install gym-invmgmt` and follow the [standalone package README](https://github.com/r2barati/gym-invmgmt) | CPU only, no checkpoints |
+| Compare your own agent against the published baselines | [Evaluate Your Own Agent](#evaluate-your-own-agent) below | `pip install -e .` only; no solver, checkpoints, or GPU |
 | Reproduce the paper's results | [Reproducibility Quick-Start](#reproducibility-quick-start) below | `.[all]` extras, downloaded checkpoints, roughly 2 hours of evaluation time (mostly the MSSP solver agents; training excluded) |
 
 The bundled `gym_invmgmt/` module has the same environment dynamics as
@@ -59,6 +61,43 @@ LLM experiments.
 ```bash
 pip install -e ".[all]"
 ```
+
+## Evaluate Your Own Agent
+
+`benchmarks/evaluate_custom.py` runs your policy on the same 26 scenarios and
+10 canonical seeds as the paper and compares it, seed by seed, against the
+published per-seed results in `results/cache_v2/`. The baselines are not
+re-run, so the base install (`pip install -e .`) is enough.
+
+Write a class with the same call convention as the shipped agents:
+
+```python
+class MyAgent:
+    def __init__(self, view, seed):
+        self.view = view   # spaces, network, observation layout; see below
+
+    def get_action(self, obs, t):
+        return ...         # array shaped like view.action_space
+```
+
+Then declare which information tier it uses and run it:
+
+```bash
+python3 benchmarks/evaluate_custom.py --policy path/to/my_agent.py:MyAgent --tier blind
+```
+
+| Tier | `view` exposes | Comparable baselines |
+|---|---|---|
+| `blind` | Observation/action spaces, the static network (topology, costs, lead times, capacities), `obs_slices`/`pipeline_slices` describing the observation layout, and `demand_history()` for past periods | MSSP, DLP, Newsvendor, (s,S), ExpSmoothing, EchelonApprox, `-B` RL agents |
+| `informed` | Everything above, plus `demand_mean(t)` (the demand engine's expected demand for any period) and `demand_noise_scale` | `-I` heuristics and solvers, informed RL agents |
+
+The script writes `episodes.csv`, `comparison.csv` (paired profit difference
+with a 95% CI per baseline and scenario), `summary.csv` (mean profit,
+optimality gap versus the Oracle, wins/ties/losses), and `run_info.json`
+(policy hash, tier, seeds, commit, package versions) to
+`results/custom/<name>/`. The Oracle is a perfect-information upper bound, not
+a deployable method. `benchmarks/example_custom_agent.py` is a working blind
+agent to start from; use `--blocks` and `--seeds` for quicker iterations.
 
 ## Dataset Ingestion
 
