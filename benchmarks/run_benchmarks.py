@@ -120,6 +120,11 @@ def _build_paper_replication():
 
 
 def _build_marl():
+    # Supplemental MARL-mode rows. The marl flag is a label only: _env_kwargs and
+    # _make_agent ignore it and no agent is wrapped in MultiAgentWrapper, so every
+    # agent runs centrally and these rows reproduce the matching A_Core
+    # (GW:False, BL:True) rows. They stay in the 26-row artifact for compatibility
+    # with the paper but are excluded from the 22-scenario core aggregate.
     scenarios = []
     for topo, dlabel in itertools.product(TOPOLOGIES, DEMAND_COMBOS.keys()):
         dcfg = dict(DEMAND_COMBOS[dlabel], base_mu=20, use_goodwill=False)
