@@ -28,7 +28,8 @@ An open-source simulation framework bridging Operations Research (OR) and Machin
 
 | Goal | Path | Requirements |
 |---|---|---|
-| Try the environment (about 5 minutes) | `pip install gym-invmgmt` and follow the [standalone package README](https://github.com/r2barati/gym-invmgmt) | CPU only, no checkpoints |
+| Try the environment and benchmark a policy (about 5 minutes) | [Getting-started notebook](https://github.com/r2barati/gym-invmgmt/blob/main/notebooks/01_get_started.ipynb) ([open in Colab](https://colab.research.google.com/github/r2barati/gym-invmgmt/blob/main/notebooks/01_get_started.ipynb)) | A browser; CPU only, no checkpoints |
+| Use the environment in your own code | `pip install gym-invmgmt` and follow the [standalone package README](https://github.com/r2barati/gym-invmgmt) | CPU only, no checkpoints |
 | Compare your own agent against the published baselines | [Evaluate Your Own Agent](#evaluate-your-own-agent) below | `pip install -e .` only; no solver, checkpoints, or GPU |
 | Reproduce the paper's results | [Reproducibility Quick-Start](#reproducibility-quick-start) below | `.[all]` extras, downloaded checkpoints, roughly 2 hours of evaluation time (mostly the MSSP solver agents; training excluded) |
 
