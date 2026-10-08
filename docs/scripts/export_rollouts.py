@@ -12,6 +12,9 @@ skipped, or the script fails with --require-ml.
 Usage (from the repository root):
     python docs/scripts/export_rollouts.py --out docs/data/rollouts
     python docs/scripts/export_rollouts.py --require-ml --verify   # as run in CI
+
+With --verify, each replay is checked against results/cache_v2 and the largest
+deviation per policy is written to index.json.
 """
 
 import argparse
@@ -115,16 +118,26 @@ def export(scfg, seed):
     return {"meta": meta, "runs": runs}
 
 
-def verify(key, seed, runs, caches):
-    """Each replay must reproduce the benchmark's cached profit for this scenario and seed."""
+def verify(key, seed, runs, caches, worst):
+    """Each replay must reproduce the benchmark's cached profit for this scenario and seed.
+
+    Optimization and heuristic policies must match to rounding. Learned policies may
+    drift slightly with the torch / stable-baselines3 version, so they get a 1%
+    relative tolerance; the largest deviation per policy is recorded in the index.
+    """
     for r in runs:
         c = caches[r["agent"]]
         row = c[(c["ScenarioKey"] == key) & (c["Seed"] == seed)]
         if row.empty:
             raise SystemExit(f"No cached result for {r['agent']} on {key}, seed {seed}")
-        cached = float(row["Profit"].iloc[0])
-        if abs(cached - r["kpis"]["profit"]) > 0.5:
-            raise SystemExit(f"{r['agent']} on {key}: replay profit {r['kpis']['profit']} != cached {cached:.1f}")
+        cached, replay = float(row["Profit"].iloc[0]), r["kpis"]["profit"]
+        diff = abs(cached - replay)
+        rel = diff / max(abs(cached), 1.0)
+        w = worst.setdefault(r["agent"], {"max_abs": 0.0, "max_rel": 0.0})
+        w["max_abs"], w["max_rel"] = max(w["max_abs"], round(diff, 2)), max(w["max_rel"], round(rel, 5))
+        too_far = rel > 0.01 if r["agent"] in LEARNED else diff > 0.5
+        if too_far:
+            raise SystemExit(f"{r['agent']} on {key}: replay profit {replay} != cached {cached:.1f}")
 
 
 def main():
@@ -137,7 +150,7 @@ def main():
 
     caches = {a: pd.read_csv(_cache_path(a)) for a, _ in AGENTS} if args.verify else None
     os.makedirs(args.out, exist_ok=True)
-    index = []
+    index, worst = [], {}
     for scfg in build_all_scenarios():
         if scfg["marl"]:
             continue
@@ -147,13 +160,17 @@ def main():
         if missing and args.require_ml:
             raise SystemExit(f"Missing checkpoints for {sorted(missing)}; run download_weights.sh first")
         if args.verify:
-            verify(key, args.seed, data["runs"], caches)
+            verify(key, args.seed, data["runs"], caches, worst)
         with open(os.path.join(args.out, slug(key) + ".json"), "w") as f:
             json.dump(data, f, separators=(",", ":"))
         index.append({"key": key, "file": slug(key) + ".json"})
         print(key, {r["agent"]: r["kpis"]["profit"] for r in data["runs"]}, flush=True)
     with open(os.path.join(args.out, "index.json"), "w") as f:
-        json.dump({"default": DEFAULT, "agents": [a for a, _ in AGENTS], "seed": args.seed, "scenarios": index}, f, indent=1)
+        out = {"default": DEFAULT, "agents": [a for a, _ in AGENTS], "learned": sorted(LEARNED), "seed": args.seed,
+               "scenarios": index}
+        if args.verify:
+            out["verification"] = worst  # largest |replay - cached| profit per policy
+        json.dump(out, f, indent=1)
 
 
 if __name__ == "__main__":
