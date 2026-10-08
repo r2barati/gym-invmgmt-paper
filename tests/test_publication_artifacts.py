@@ -3,7 +3,7 @@ import os
 import csv
 import pandas as pd
 
-from benchmarks.run_benchmarks import ALL_AGENT_IDS
+from benchmarks.run_benchmarks import ALL_AGENT_IDS, _cache_path
 
 def get_csv_path():
     candidates = [
@@ -64,3 +64,27 @@ def test_csv_row_counts_and_nans():
         # If all profit columns are NaN, this is a bad row
         if row[profit_cols].isna().all():
             pytest.fail(f"Row {i} is entirely NaN for all profit columns.")
+
+@pytest.mark.parametrize("agent_id", ALL_AGENT_IDS)
+def test_marl_rows_reproduce_core_rows(agent_id):
+    """The MARL flag is a label only, so C_MARL rows equal their A_Core twins.
+
+    If a decentralized MARL evaluation is ever wired in, this test should fail
+    and the README's MARL-mode note should be updated.
+    """
+    path = _cache_path(agent_id)
+    if not os.path.exists(path):
+        pytest.skip(f"No cache for {agent_id}")
+    df = pd.read_csv(path)
+    marl = df[df["Block"] == "C_MARL"]
+    if marl.empty:
+        pytest.skip(f"No MARL rows for {agent_id}")
+    for key, rows in marl.groupby("ScenarioKey"):
+        core_key = (key.replace("C_MARL|", "A_Core|", 1)
+                       .replace("MARL:True", "MARL:False"))
+        core = df[df["ScenarioKey"] == core_key].set_index("Seed")["Profit"]
+        marl_profit = rows.set_index("Seed")["Profit"]
+        seeds = marl_profit.index.intersection(core.index)
+        assert len(seeds) > 0, f"No A_Core rows matching {key}"
+        pd.testing.assert_series_equal(marl_profit[seeds], core[seeds],
+                                       check_names=False, rtol=0, atol=1e-6)
