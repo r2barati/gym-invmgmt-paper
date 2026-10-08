@@ -934,7 +934,7 @@ python3 verify_publication_ready.py --quick</code></pre>
     function axes(w, h, yMin, yMax) {
       const step = niceStep(yMax - yMin, 3), Y = (v) => M.t + (h - M.t - M.b) * (1 - (v - yMin) / (yMax - yMin));
       let s = `<g class="grid">`;
-      for (let v = Math.ceil(yMin / step) * step; v <= yMax + 1e-9; v += step) s += `<line x1="${M.l}" x2="${w - M.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${M.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${fmt0.format(v)}</text>`;
+      for (let v = Math.ceil(yMin / step) * step; v <= yMax + 1e-9; v += step) s += `<line x1="${M.l}" x2="${w - M.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${M.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${fmt0.format(v || 0)}</text>`;
       s += `</g>`;
       [0, 10, 20, 30].forEach((t) => { s += `<text x="${M.l + (w - M.l - M.r) * (t / T)}" y="${h - 8}" text-anchor="middle">${t}</text>`; });
       s += `<line class="axis" x1="${M.l}" x2="${w - M.r}" y1="${Y(Math.max(0, yMin))}" y2="${Y(Math.max(0, yMin))}"/>`;
@@ -1042,9 +1042,11 @@ python3 verify_publication_ready.py --quick</code></pre>
     let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => data && drawCharts(), 60); }).observe($("#sim .charts"));
 
     // State how closely the replays reproduce the cached benchmark results.
-    const ver = index.verification || {}, learnedRel = Object.entries(ver).filter(([a]) => (index.learned || []).includes(a)).map(([, v]) => v.max_rel);
-    if (learnedRel.length && Math.max(...learnedRel) > 0) {
-      $("#sim-verify").innerHTML = `Final profits match <code>results/cache_v2</code> to within rounding for optimization and heuristic policies, and within ${fmt1.format(Math.max(...learnedRel) * 100)}% for learned policies, whose floating-point results vary slightly across PyTorch versions.`;
+    // Profits are stored to one decimal, so differences up to 0.1 are rounding.
+    const learned = Object.entries(index.verification || {}).filter(([a]) => (index.learned || []).includes(a)).map(([, v]) => v);
+    if (learned.some((v) => v.max_abs > 0.1)) {
+      const rel = Math.max(...learned.map((v) => v.max_rel)) * 100;
+      $("#sim-verify").innerHTML = `Final profits match <code>results/cache_v2</code> to within rounding for optimization and heuristic policies, and within ${rel < 0.1 ? rel.toFixed(2) : fmt1.format(rel)}% for learned policies, whose floating-point results vary slightly across PyTorch builds.`;
     }
     const first = index.scenarios.find((s) => s.key === index.default) || index.scenarios[0];
     return openScenario(first.file, false).then(() => {
