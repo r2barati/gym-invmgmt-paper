@@ -3,9 +3,17 @@
  "agents": [
   "Oracle",
   "MSSP-I",
+  "DLP",
   "Newsvendor-I",
   "(s,S)",
-  "DLP"
+  "PPO-Transformer",
+  "PPO-MLP",
+  "DAgger-G"
+ ],
+ "learned": [
+  "DAgger-G",
+  "PPO-MLP",
+  "PPO-Transformer"
  ],
  "seed": 42,
  "scenarios": [
@@ -97,5 +105,39 @@
    "key": "D_WalmartM5|serial|M5_volatile|GW:False|BL:True|MARL:False",
    "file": "d-walmartm5-serial-m5-volatile-gw-false-bl-true-marl-false.json"
   }
- ]
+ ],
+ "verification": {
+  "Oracle": {
+   "max_abs": 0.05,
+   "max_rel": 5e-05
+  },
+  "MSSP-I": {
+   "max_abs": 0.06,
+   "max_rel": 7e-05
+  },
+  "DLP": {
+   "max_abs": 0.05,
+   "max_rel": 0.00044
+  },
+  "Newsvendor-I": {
+   "max_abs": 0.04,
+   "max_rel": 7e-05
+  },
+  "(s,S)": {
+   "max_abs": 0.05,
+   "max_rel": 0.00119
+  },
+  "PPO-Transformer": {
+   "max_abs": 0.05,
+   "max_rel": 9e-05
+  },
+  "PPO-MLP": {
+   "max_abs": 0.05,
+   "max_rel": 0.00028
+  },
+  "DAgger-G": {
+   "max_abs": 0.05,
+   "max_rel": 0.00047
+  }
+ }
 }
