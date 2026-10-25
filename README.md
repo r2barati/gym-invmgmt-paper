@@ -1,16 +1,18 @@
-# gym-invmgmt: An Open Benchmarking Framework for Inventory Management Methods
+<div align="center">
 
-**Project website:** [r2barati.github.io/gym-invmgmt-paper](https://r2barati.github.io/gym-invmgmt-paper/) (interactive leaderboard, episode replays, robustness analysis and documentation)
+# gym-invmgmt
+### An Open Benchmarking Framework for Inventory Management Methods
 
-An open-source simulation framework bridging Operations Research (OR) and Machine Learning (ML) for multi-echelon supply chain optimization.
+**Maintained by [Reza Barati](https://github.com/r2barati)**  
+Toronto Metropolitan University
 
-## Project Links
+[Paper](https://arxiv.org/abs/2605.11355) · [Project page](https://r2barati.github.io/gym-invmgmt-paper/) · [Environment](https://github.com/r2barati/gym-invmgmt) · [Checkpoints](https://huggingface.co/datasets/rezabarati/gym-invmgmt-weights) · [Try in Colab](https://colab.research.google.com/github/r2barati/gym-invmgmt/blob/main/notebooks/01_get_started.ipynb)
 
-- Project website: [r2barati.github.io/gym-invmgmt-paper](https://r2barati.github.io/gym-invmgmt-paper/)
-- Paper/code repository: [r2barati/gym-invmgmt-paper](https://github.com/r2barati/gym-invmgmt-paper)
-- arXiv paper: [arXiv:2605.11355](https://arxiv.org/abs/2605.11355)
-- Standalone environment package: [r2barati/gym-invmgmt](https://github.com/r2barati/gym-invmgmt)
-- Trained checkpoint archive: [rezabarati/gym-invmgmt-weights](https://huggingface.co/datasets/rezabarati/gym-invmgmt-weights)
+**Multi-echelon inventory · Operations research + reinforcement learning · Reproducible benchmarking**
+
+</div>
+
+An open-source framework for comparing inventory management methods in a common multi-echelon supply-chain simulator. The benchmark repository provides reference agents, a 22-scenario core evaluation grid, four supplementary MARL-mode rows, and reproducibility artifacts.
 
 ## Repository Structure
 
