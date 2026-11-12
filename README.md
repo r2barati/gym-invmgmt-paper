@@ -6,7 +6,7 @@
 **Maintained by [Reza Barati](https://github.com/r2barati)**  
 Toronto Metropolitan University
 
-[Paper](https://arxiv.org/abs/2605.11355) · [Project page](https://r2barati.github.io/gym-invmgmt-paper/) · [Environment](https://github.com/r2barati/gym-invmgmt) · [Checkpoints](https://huggingface.co/datasets/rezabarati/gym-invmgmt-weights) · [Try in Colab](https://colab.research.google.com/github/r2barati/gym-invmgmt/blob/main/notebooks/01_get_started.ipynb)
+[Paper](https://arxiv.org/abs/2605.11355) · [Slides](docs/talks/gym-invmgmt-tmu-cs-seminar-2026.pdf) · [Project page](https://r2barati.github.io/gym-invmgmt-paper/) · [Environment](https://github.com/r2barati/gym-invmgmt) · [Checkpoints](https://huggingface.co/datasets/rezabarati/gym-invmgmt-weights) · [Try in Colab](https://colab.research.google.com/github/r2barati/gym-invmgmt/blob/main/notebooks/01_get_started.ipynb)
 
 **Multi-echelon inventory · Operations research + reinforcement learning · Reproducible benchmarking**
 
