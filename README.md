@@ -28,6 +28,8 @@ An open-source framework for comparing inventory management methods in a common 
     canonical benchmark artifact.
   - `benchmark_final_merged.csv`: The canonical merged CSV consumed by all figure scripts.
 - `data/models/`: Pre-trained RL model checkpoints (hosted on HuggingFace — see below).
+- `docs/`: Project page (<https://r2barati.github.io/gym-invmgmt-paper/>).
+  - `talks/gym-invmgmt-tmu-cs-seminar-2026.pdf`: Slides of the TMU Computer Science Weekly Seminar talk (2026).
 
 ## Which Path Do You Need?
 

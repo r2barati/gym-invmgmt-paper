@@ -46,6 +46,7 @@ venv.bak/
 *.synctex.gz
 *.pdf
 !paper/figures/framework_architecture.pdf
+!docs/talks/*.pdf
 
 # Data / Models (large binary files — hosted on HuggingFace)
 data/external/

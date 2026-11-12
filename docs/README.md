@@ -12,6 +12,7 @@ results.
 | `data/leaderboard.json` | Per-scenario means from `results/benchmark_final_merged.csv`, per-seed profits and cost breakdowns from `results/cache_v2/`, and one-line method descriptions. |
 | `data/rollouts/` | Per-period state of eight policies (optimization, heuristic and learned) on each of the 22 main scenarios, at benchmark seed 42. One file per scenario plus `index.json`. |
 | `data/topologies.json` | The two benchmark networks and the YAML networks in `gym_invmgmt/topologies/`. |
+| `talks/gym-invmgmt-tmu-cs-seminar-2026.pdf` | Slides of the TMU Computer Science Weekly Seminar talk (2026), linked from the page's Slides button. |
 | `media/teaser.mp4`, `media/teaser-poster.png` | Teaser clip of the player for the README, slides and social posts. |
 | `fonts/` | Computer Modern Unicode (Serif and Typewriter) web fonts, self-hosted under the SIL Open Font License in `fonts/OFL.txt`. |
 | `scripts/` | Generators for everything in `data/` and `media/`, and `check_site_data.py`, which validates `data/` against the results. |
